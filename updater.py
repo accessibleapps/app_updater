@@ -8,41 +8,36 @@ from zipfile import ZipFile
 import subprocess
 import stat
 
-class AutoUpdater():
- def __init__(self, URL, location, bootstrapper, onExit, MD5="none"):
+class AutoUpdater(object):
+
+ def __init__(self, URL, location, bootstrapper, MD5=None, percentage_callback=None, finish_callback=None):
   """Supply a URL/location/bootstrapper filename to download a zip file from
-     The onExit argument should be a Python function it'll call when done"""
+     The finish_callback argument should be a Python function it'll call when done"""
   #Let's download the file using urllib
-  self.percent = 0
-  self.attempts = 0 
   self.complete = 0
-  self.onExit = onExit #What to do on exit
+  self.finish_callback = finish_callback #What to do on exit
+  self.percentage_callback = percentage_callback or self.print_percentage_callback
   #Change our location to not be local -- use platform_utils
   location = os.path.join(platform_utils.paths.app_data_path('updater'), location)
   platform_utils.paths.prepare_app_data_path('updater')
   #os.chmod(platform_utils.paths.app_data_path('updater'), 777)
   #os.chmod(platform_utils.paths.app_data_path('updater'), stat.S_IRWXU)
   self.start(URL, location, bootstrapper, MD5)
- 
+
+
  def hookProg(self, count, bSize, tSize):
-   #This nice little function gets called a few times a second
-   #It'll update the percent
-   self.percent = int(count*bSize*100/tSize)
-   print str(self.percent)
- 
- def get_percent(self):
-  """Returns a string of the current percent"""
-  return str(self.percent)
+  """Callback to update percentage of download"""
+  percent = int(count*bSize*100/tSize)
+  self.percentage_callback(percent)
+
+ @staticmethod
+ def print_percentage_callback(percent):
+  print percent
 
  def start(self, URL, location, bootstrapper, MD5):
   """Called by __init__ to start the whole process"""
-  self.attempts = self.attempts + 1
   Listy = urllib.urlretrieve(URL, location, reporthook=self.hookProg)
-  if self.attempts >= 3:
-   #If we have had 3 or more attempts where the MD5 did not match, throw an error.
-   raise(Exception, "Three Attempts have been made to download the file. None have matched MD5. Contact the developer.")
-  #So once we get to this line, the file has been downloaded
-  if not MD5 == "none":
+  if MD5:
    #Check the MD5
    if self.MD5File(location) != MD5:
     #ReDownload
@@ -75,5 +70,4 @@ class AutoUpdater():
   print BootStr
   subprocess.call([BootStr], shell=True)
   self.complete = 1
-  print "DONE!!!!"
-  self.onExit()
+  self.finish_callback()
