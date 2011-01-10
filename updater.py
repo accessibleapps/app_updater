@@ -66,7 +66,7 @@ class AutoUpdater(object):
   #os.chmod(Pathy, 775)
   zippy.extractall(Pathy)
   BootStr = os.path.join(Pathy, bootstrapper)
-  os.chmod(BootStr, stat.S_IEXEC|stat.S_IWRITE|stat.S_IEXEC|stat.S_IWRITE|stat.S_IEXEC|stat.S_IWRITE)
+  os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   print BootStr
   subprocess.call([BootStr], shell=True)
   self.complete = 1
