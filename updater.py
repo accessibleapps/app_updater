@@ -7,6 +7,7 @@ import os
 from zipfile import ZipFile
 import subprocess
 import stat
+import platform
 
 class AutoUpdater(object):
 
@@ -67,6 +68,9 @@ class AutoUpdater(object):
   BootStr = os.path.join(Pathy, self.bootstrapper)
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   print BootStr
-  subprocess.call([BootStr + " -l " + Pathy], shell=True)
+  if platform.system() == "Linux":
+    subprocess.call(["python " + BootStr + " -l " + Pathy], shell=True) 
+  else:
+    subprocess.call([BootStr + " -l " + Pathy], shell=True)
   self.complete = 1
   self.finish_callback()
