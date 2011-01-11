@@ -61,7 +61,6 @@ class AutoUpdater(object):
   """Called when the file is done downloading, and MD5 has been successfull"""
   CurD = os.getcwd() #Store our current working directory (of main app)
   print location
- # os.chmod(location, 777)
   zippy = ZipFile(location, 'r')
   Pathy = os.path.join(platform_utils.paths.app_data_path('updater'), os.path.basename(location).strip(".zip"))
   zippy.extractall(Pathy)
