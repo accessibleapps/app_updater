@@ -68,6 +68,6 @@ class AutoUpdater(object):
   BootStr = os.path.join(Pathy, bootstrapper)
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   print BootStr
-  subprocess.call([BootStr], shell=True)
+  subprocess.call([BootStr + " -l " + Pathy], shell=True)
   self.complete = 1
   self.finish_callback()
