@@ -19,7 +19,7 @@ def main():
  #IE: /home/family/Desktop/updater
  dirList=os.listdir(location)
  for x in dirList:
-  print "FROM: " + os.path.join(location, x) + " TO " +   os.path.join(os.getcwd(), x)
+  print "FROM: " + os.path.join(os.getcwd(), x) + " TO " + os.path.join(location, x) 
   shutil.move(os.path.join(location, x), os.path.join(os.getcwd(), x))
  
 

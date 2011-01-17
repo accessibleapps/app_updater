@@ -66,10 +66,11 @@ class AutoUpdater(object):
   zippy.extractall(Pathy)
   BootStr = os.path.join(Pathy, self.bootstrapper)
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
-  print BootStr
-  if platform.system() == "Linux":
-    subprocess.call(["python " + BootStr + " -l " + Pathy], shell=True) 
-  else:
-    subprocess.call([BootStr + " -l " + Pathy], shell=True)
+  print "BOOTSTR " +  BootStr
+  # if platform.system() == "Linux" or 1==1:
+  print 'python "%s" -l "%s"' % (BootStr, Pathy)
+  subprocess.call(['python "%s" -l "%s"' % (BootStr, Pathy)], shell=True) 
+  # else:
+  # subprocess.call([BootStr + " -l " + Pathy], shell=True)
   self.complete = 1
   self.finish_callback()
