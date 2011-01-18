@@ -8,6 +8,7 @@ from zipfile import ZipFile
 import subprocess
 import stat
 import platform
+import shutil
 
 class AutoUpdater(object):
 
@@ -64,12 +65,15 @@ class AutoUpdater(object):
   zippy = ZipFile(location, 'r')
   Pathy = os.path.join(platform_utils.paths.app_data_path('updater'), os.path.basename(location).strip(".zip"))
   zippy.extractall(Pathy)
-  BootStr = os.path.join(Pathy, self.bootstrapper)
+  BootStr = os.path.join(platform_utils.paths.app_data_path('updater'), self.bootstrapper) #where we will find out bootstrapper
+  shutil.move(os.path.join(Pathy, self.bootstrapper), platform_utils.paths.app_data_path('updater')) #move bootstrapper
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   print "BOOTSTR " +  BootStr
   # if platform.system() == "Linux" or 1==1:
-  print 'python "%s" -l "%s"' % (BootStr, Pathy)
-  subprocess.call(['python "%s" -l "%s"' % (BootStr, Pathy)], shell=True) 
+  print '"%s" -l "%s" -d "%s"' % (BootStr, Pathy, os.path.basename(location).strip(".zip"))
+  #subprocess.call(['python "%s" -l "%s"' % (BootStr, Pathy)], shell=True) 
+  subprocess.call(['"%s" -l "%s" -d "%s"' % (BootStr, Pathy, os.path.basename(location).strip(".zip"))], shell=True) 
+
   # else:
   # subprocess.call([BootStr + " -l " + Pathy], shell=True)
   self.complete = 1
