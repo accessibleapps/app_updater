@@ -70,10 +70,10 @@ class AutoUpdater(object):
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   print "BOOTSTR " +  BootStr
   # if platform.system() == "Linux" or 1==1:
-  print '"%s" -l "%s" -d "%s"' % (BootStr, Pathy, os.path.basename(location).strip(".zip"))
+  print '"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))
   #subprocess.call(['python "%s" -l "%s"' % (BootStr, Pathy)], shell=True) 
-  subprocess.call(['"%s" -l "%s" -d "%s"' % (BootStr, Pathy, os.path.basename(location).strip(".zip"))], shell=True) 
-
+  ##subprocess.check_call(['"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))], shell=True) 
+  subprocess.Popen(r'"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip")))
   # else:
   # subprocess.call([BootStr + " -l " + Pathy], shell=True)
   self.complete = 1
