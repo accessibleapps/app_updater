@@ -72,9 +72,12 @@ class AutoUpdater(object):
   # if platform.system() == "Linux" or 1==1:
   print '"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))
   #subprocess.call(['python "%s" -l "%s"' % (BootStr, Pathy)], shell=True) 
-  ##subprocess.check_call(['"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))], shell=True) 
-  subprocess.Popen(r'"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip")))
-  # else:
+  ##subprocess.check_call(['"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))], shell=True)
+  if platform.system() == "Windows": 
+    subprocess.Popen(r'"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip")))
+  else:
+    print r'sh "%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))
+    subprocess.call([r'sh "%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))], shell=True)
   # subprocess.call([BootStr + " -l " + Pathy], shell=True)
   self.complete = 1
   self.finish_callback()
