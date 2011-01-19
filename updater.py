@@ -1,6 +1,7 @@
 #AutoUpdater
 #Released under a GNU GPL
 import urllib
+import urllib2
 import platform_utils
 import hashlib
 import os
@@ -9,6 +10,7 @@ import subprocess
 import stat
 import platform
 import shutil
+import json
 
 class AutoUpdater(object):
 
@@ -81,3 +83,16 @@ class AutoUpdater(object):
   # subprocess.call([BootStr + " -l " + Pathy], shell=True)
   self.complete = 1
   self.finish_callback()
+
+def check_update(URL, cversion):
+  """Return a URL to an update of the application for the current platform at the given URL if one exists, or None""
+     Assumes Windows, Linux, or Mac"""
+  response = urllib2.urlopen(URL)
+  jsonStr = response.read().strip("\n")
+  print str(jsonStr)
+  print json.loads(jsonStr)
+  jsonP = json.loads(jsonStr)
+  if jsonP['current_version'] > cversion:
+    return jsonP['downloads'][platform.system()]
+  else:
+   return None
