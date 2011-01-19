@@ -84,15 +84,11 @@ class AutoUpdater(object):
   self.complete = 1
   self.finish_callback()
 
-def check_update(URL, cversion):
+def find_update_url(URL, version):
   """Return a URL to an update of the application for the current platform at the given URL if one exists, or None""
      Assumes Windows, Linux, or Mac"""
   response = urllib2.urlopen(URL)
-  jsonStr = response.read().strip("\n")
-  print str(jsonStr)
-  print json.loads(jsonStr)
-  jsonP = json.loads(jsonStr)
-  if jsonP['current_version'] > cversion:
-    return jsonP['downloads'][platform.system()]
-  else:
-   return None
+  json_str = response.read().strip("\n")
+  json_p = json.loads(json_str)
+  if json_p['current_version'] > version:
+    return json_p['downloads'][platform.system()]
