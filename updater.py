@@ -25,11 +25,11 @@ class AutoUpdater(object):
   self.bootstrapper = bootstrapper
   self.MD5 = MD5
   #Change our location to not be local -- use platform_utils
-  self.save_location = os.path.join(platform_utils.paths.app_data_path('updater'), save_location)
-  platform_utils.paths.prepare_app_data_path('updater')
+  self.save_location = save_location
+  if not os.path.exists(save_location):
+   os.mkdir(save_location)
 
-
- def hookProg(self, count, bSize, tSize):
+ def transfer_callback(self, count, bSize, tSize):
   """Callback to update percentage of download"""
   percent = int(count*bSize*100/tSize)
   self.percentage_callback(percent)
@@ -40,20 +40,13 @@ class AutoUpdater(object):
 
  def start_update(self):
   """Called to start the whole process"""
-  Listy = urllib.urlretrieve(self.URL, self.save_location, reporthook=self.hookProg)
+  Listy = urllib.urlretrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
   if self.MD5:
    #Check the MD5
    if self.MD5File(location) != self.MD5:
     #ReDownload
-    print "MD5 HASH FAIL -- RETRY DOWNLOAD"
     self.start_update()
-   else:
-    #It redownloaded properly
-    self.download_complete(Listy[0])
-  else:
-   #We don't know if it downloaded properly
-   #The programmer didn't give us an MD5. So we have to assume it was valid.
-   self.download_complete(Listy[0])
+  self.download_complete(Listy[0])
 
  def MD5File(self, fileName):
   "Custom function that will get the Md5 sum of our file"
@@ -63,26 +56,19 @@ class AutoUpdater(object):
  def download_complete(self, location):
   """Called when the file is done downloading, and MD5 has been successfull"""
   CurD = os.getcwd() #Store our current working directory (of main app)
-  print location
   zippy = ZipFile(location, 'r')
   Pathy = os.path.join(platform_utils.paths.app_data_path('updater'), os.path.basename(location).strip(".zip"))
   zippy.extractall(Pathy)
-  BootStr = os.path.join(platform_utils.paths.app_data_path('updater'), self.bootstrapper) #where we will find out bootstrapper
+  BootStr = os.path.join(platform_utils.paths.app_data_path('updater'), self.bootstrapper) #where we will find our bootstrapper
   shutil.move(os.path.join(Pathy, self.bootstrapper), platform_utils.paths.app_data_path('updater')) #move bootstrapper
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
-  print "BOOTSTR " +  BootStr
-  # if platform.system() == "Linux" or 1==1:
-  print '"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))
-  #subprocess.call(['python "%s" -l "%s"' % (BootStr, Pathy)], shell=True) 
-  ##subprocess.check_call(['"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))], shell=True)
   if platform.system() == "Windows": 
     subprocess.Popen(r'"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip")))
   else:
-    print r'sh "%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))
     subprocess.call([r'sh "%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))], shell=True)
-  # subprocess.call([BootStr + " -l " + Pathy], shell=True)
   self.complete = 1
-  self.finish_callback()
+  if callable(self.finish_callback):
+   self.finish_callback()
 
 def find_update_url(URL, version):
   """Return a URL to an update of the application for the current platform at the given URL if one exists, or None""
