@@ -25,9 +25,10 @@ class AutoUpdater(object):
   self.bootstrapper = bootstrapper
   self.MD5 = MD5
   #Change our location to not be local -- use platform_utils
-  self.save_location = save_location
-  if not os.path.exists(save_location):
-   os.mkdir(save_location)
+  platform_utils.paths.prepare_app_data_path('updater')
+  self.save_location = os.path.join(platform_utils.paths.app_data_path('updater'), save_location)
+  #if not os.path.exists(save_location):
+   #os.mkdir(save_location)
 
  def transfer_callback(self, count, bSize, tSize):
   """Callback to update percentage of download"""
@@ -40,6 +41,7 @@ class AutoUpdater(object):
 
  def start_update(self):
   """Called to start the whole process"""
+  print "URL: " + self.URL + "   SL:  " + self.save_location
   Listy = urllib.urlretrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
   if self.MD5:
    #Check the MD5
@@ -65,7 +67,7 @@ class AutoUpdater(object):
   if platform.system() == "Windows": 
     subprocess.Popen(r'"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip")))
   else:
-    subprocess.call([r'sh "%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"))], shell=True)
+    subprocess.Popen([r'sh "%s" -l "%s" -d "%s" "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"), str(os.getpid()))], shell=True)
   self.complete = 1
   if callable(self.finish_callback):
    self.finish_callback()

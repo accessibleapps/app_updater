@@ -1,6 +1,10 @@
 import platform
-def die():
+import time
+import sys
+
+def die(): 
  print "Exit Function"
+
 
 from updater import AutoUpdater
 import updater
@@ -9,4 +13,3 @@ if platform.system() == "Windows":
 else:
   A = AutoUpdater("http://dl.dropbox.com/u/4410208/test-lin.zip", "test-lin.zip", "bootstrapper.sh", finish_callback=die)
 A.start_update()
-
