@@ -3,8 +3,9 @@ import time
 import sys
 
 def die(): 
- print "Exit Function"
-
+ print "Exit"
+ time.sleep(15)
+ print "REALDIE"
 
 from updater import AutoUpdater
 import updater

@@ -65,7 +65,7 @@ class AutoUpdater(object):
   shutil.move(os.path.join(Pathy, self.bootstrapper), platform_utils.paths.app_data_path('updater')) #move bootstrapper
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   if platform.system() == "Windows": 
-    subprocess.Popen(r'"%s" -l "%s" -d "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip")))
+    subprocess.Popen(r'"%s" -l "%s" -d "%s" "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"), str(os.getpid())))
   else:
     subprocess.Popen([r'sh "%s" -l "%s" -d "%s" "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"), str(os.getpid()))], shell=True)
   self.complete = 1
