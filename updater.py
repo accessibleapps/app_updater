@@ -78,6 +78,13 @@ class AutoUpdater(object):
   if callable(self.finish_callback):
    self.finish_callback()
 
+ def cleanup(self):
+  """Delete stuff"""
+  try:
+   shutil.rmtree(self.save_location_nofile)
+  except any:
+   return
+
 def find_update_url(URL, version):
   """Return a URL to an update of the application for the current platform at the given URL if one exists, or None""
      Assumes Windows, Linux, or Mac"""
@@ -86,3 +93,5 @@ def find_update_url(URL, version):
   json_p = json.loads(json_str)
   if json_p['current_version'] > version:
     return json_p['downloads'][platform.system()]
+
+

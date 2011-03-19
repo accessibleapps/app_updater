@@ -15,3 +15,4 @@ if platform.system() == "Windows":
 else:
   A = AutoUpdater("http://dl.dropbox.com/u/4410208/test-lin.zip", os.path.join(os.getcwd(), "updater", "updater.zip"), "bootstrapper.sh", finish_callback=die)
 A.start_update()
+#To try cleanup, replace start_update() with cleanup()
