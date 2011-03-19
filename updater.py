@@ -24,11 +24,16 @@ class AutoUpdater(object):
   self.URL = URL
   self.bootstrapper = bootstrapper
   self.MD5 = MD5
-  #Change our location to not be local -- use platform_utils
-  platform_utils.paths.prepare_app_data_path('updater')
-  self.save_location = os.path.join(platform_utils.paths.app_data_path('updater'), save_location)
-  #if not os.path.exists(save_location):
-   #os.mkdir(save_location)
+  self.save_location = save_location
+  #self.save_location contains the full path, including the blabla.zip
+  save_location = save_location.split("/")
+  save_location.pop()
+  save_location = str("/".join(save_location))
+  self.save_location_nofile = save_location
+  #self.save_location_nofile doesn't contain the blabla.zip
+  if not os.path.exists(self.save_location):
+   #We need to make all folders but the last one
+   os.makedirs(self.save_location_nofile)
 
  def transfer_callback(self, count, bSize, tSize):
   """Callback to update percentage of download"""
@@ -58,11 +63,12 @@ class AutoUpdater(object):
  def download_complete(self, location):
   """Called when the file is done downloading, and MD5 has been successfull"""
   CurD = os.getcwd() #Store our current working directory (of main app)
+  print "DOWNLOAD COMPLETE: " + str(location)
   zippy = ZipFile(location, 'r')
-  Pathy = os.path.join(platform_utils.paths.app_data_path('updater'), os.path.basename(location).strip(".zip"))
+  Pathy = os.path.join(self.save_location_nofile, os.path.basename(location).strip(".zip"))
   zippy.extractall(Pathy)
-  BootStr = os.path.join(platform_utils.paths.app_data_path('updater'), self.bootstrapper) #where we will find our bootstrapper
-  shutil.move(os.path.join(Pathy, self.bootstrapper), platform_utils.paths.app_data_path('updater')) #move bootstrapper
+  BootStr = os.path.join(self.save_location_nofile, self.bootstrapper) #where we will find our bootstrapper
+  shutil.move(os.path.join(Pathy, self.bootstrapper), self.save_location_nofile) #move bootstrapper
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   if platform.system() == "Windows": 
     subprocess.Popen(r'"%s" -l "%s" -d "%s" "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"), str(os.getpid())))
