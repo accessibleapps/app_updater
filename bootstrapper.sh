@@ -4,7 +4,7 @@
 #This script was originally written in Python, but converted to BASH/AutoIt for size
 
 PIDD="$5"
-while sleep 1; do kill -0 $PIDD || break; done
+kill -0 $pid >/dev/null
 # Absolute path to this script. /home/user/bin/foo.sh
 SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
