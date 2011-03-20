@@ -26,9 +26,13 @@ class AutoUpdater(object):
   self.MD5 = MD5
   self.save_location = save_location
   #self.save_location contains the full path, including the blabla.zip
-  save_location = save_location.split("/")
+  if platform.system() == "Windows":
+      backSlash = "\"
+  else:
+      backSlash = "/"
+  save_location = save_location.split(backSlash)
   save_location.pop()
-  save_location = str("/".join(save_location))
+  save_location = str(backSlash.join(save_location))
   self.save_location_nofile = save_location
   #self.save_location_nofile doesn't contain the blabla.zip
   if not os.path.exists(self.save_location):
