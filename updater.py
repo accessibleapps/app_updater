@@ -27,7 +27,7 @@ class AutoUpdater(object):
   self.save_location = save_location
   #self.save_location contains the full path, including the blabla.zip
   if platform.system() == "Windows":
-      backSlash = "\"
+      backSlash = "\\"
   else:
       backSlash = "/"
   save_location = save_location.split(backSlash)
