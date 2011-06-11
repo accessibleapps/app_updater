@@ -4,7 +4,7 @@
 import logging
 logger = logging.getLogger('updater')
 
-import urllib
+from urllib import FancyURLopener, URLopener
 import urllib2
 import hashlib
 import os
@@ -53,7 +53,7 @@ class AutoUpdater(object):
   """Called to start the whole process"""
   logger.debug("URL: %s   SL: %s" % (self.URL, self.save_location))
   self.prepare_staging_directory()
-  Listy = urllib.urlretrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
+  Listy = CustomURLOpener().retrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
   if self.MD5:
    #Check the MD5
    if self.MD5File(location) != self.MD5:
@@ -98,3 +98,7 @@ def find_update_url(URL, version):
   json_p = json.loads(json_str)
   if json_p['current_version'] > version:
     return json_p['downloads'][platform.system()]
+
+class CustomURLOpener(FancyURLopener):
+ def http_error_default(*a, **k):
+  return URLopener.http_error_default(*a, **k)
