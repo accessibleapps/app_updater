@@ -31,16 +31,14 @@ class AutoUpdater(object):
   self.MD5 = MD5
   self.save_location = save_location
   #self.save_location contains the full path, including the blabla.zip
-  save_location = list(os.path.split(save_location))
-  save_location.pop()
-  save_location = os.path.join((save_location))
-  self.save_location_nofile = save_location
-  #self.save_location_nofile doesn't contain the blabla.zip
+  self.save_directory = os.path.join(*os.path.split(save_location)[:-1])
+  #self.save_directory doesn't contain the blabla.zip
 
  def prepare_staging_directory(self):
-  if not os.path.exists(self.save_location):
+  if not os.path.exists(self.save_directory):
    #We need to make all folders but the last one
-   os.makedirs(self.save_location_nofile)
+   os.makedirs(self.save_directory)
+   logger.info("Created staging directory  %s" % self.save_directory)
 
  def transfer_callback(self, count, bSize, tSize):
   """Callback to update percentage of download"""
@@ -71,11 +69,11 @@ class AutoUpdater(object):
  def download_complete(self, location):
   """Called when the file is done downloading, and MD5 has been successfull"""
   logger.debug("Download complete.")
-  zippy = ZipFile(location, mode='r', pwd=self.password)
-  Pathy = os.path.join(self.save_location_nofile, os.path.basename(location).strip(".zip"))
-  zippy.extractall(Pathy)
-  BootStr = os.path.join(self.save_location_nofile, self.bootstrapper) #where we will find our bootstrapper
-  shutil.move(os.path.join(Pathy, self.bootstrapper), self.save_location_nofile) #move bootstrapper
+  zippy = ZipFile(location, mode='r')
+  Pathy = os.path.join(self.save_directory, os.path.basename(location).strip(".zip"))
+  zippy.extractall(Pathy, pwd=self.password)
+  BootStr = os.path.join(self.save_directory, self.bootstrapper) #where we will find our bootstrapper
+  shutil.move(os.path.join(Pathy, self.bootstrapper), self.save_directory) #move bootstrapper
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   if platform.system() == "Windows": 
     subprocess.Popen(r'"%s" -l "%s" -d "%s" "%s"' % (BootStr, self.app_path, os.path.basename(location).strip(".zip"), str(os.getpid())))
@@ -88,7 +86,7 @@ class AutoUpdater(object):
  def cleanup(self):
   """Delete stuff"""
   try:
-   shutil.rmtree(self.save_location_nofile)
+   shutil.rmtree(self.save_directory)
   except any:
    return
 
