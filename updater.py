@@ -54,6 +54,7 @@ class AutoUpdater(object):
  def start_update(self):
   """Called to start the whole process"""
   logger.debug("URL: %s   SL: %s" % (self.URL, self.save_location))
+  self.prepare_staging_directory()
   Listy = urllib.urlretrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
   if self.MD5:
    #Check the MD5
