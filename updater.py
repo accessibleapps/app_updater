@@ -27,7 +27,7 @@ class AutoUpdater(object):
   self.MD5 = MD5
   self.save_location = save_location
   #self.save_location contains the full path, including the blabla.zip
-  save_location = os.path.split(save_location)
+  save_location = list(os.path.split(save_location))
   save_location.pop()
   save_location = os.path.join((save_location))
   self.save_location_nofile = save_location
