@@ -1,8 +1,7 @@
 #AutoUpdater
-#Released under a GNU GPL
+#Released under an MIT license
 import urllib
 import urllib2
-import platform_utils
 import hashlib
 import os
 from zipfile import ZipFile
@@ -14,7 +13,7 @@ import json
 
 class AutoUpdater(object):
 
- def __init__(self, URL, save_location, bootstrapper, MD5=None, percentage_callback=None, finish_callback=None):
+ def __init__(self, URL, save_location, bootstrapper, app_path, password=None, MD5=None, percentage_callback=None, finish_callback=None):
   """Supply a URL/location/bootstrapper filename to download a zip file from
      The finish_callback argument should be a Python function it'll call when done"""
   #Let's download the file using urllib
@@ -23,18 +22,18 @@ class AutoUpdater(object):
   self.percentage_callback = percentage_callback or self.print_percentage_callback
   self.URL = URL
   self.bootstrapper = bootstrapper
+  self.app_path = app_path
+  self.password = password  
   self.MD5 = MD5
   self.save_location = save_location
   #self.save_location contains the full path, including the blabla.zip
-  if platform.system() == "Windows":
-      backSlash = "\\"
-  else:
-      backSlash = "/"
-  save_location = save_location.split(backSlash)
+  save_location = os.path.split(save_location)
   save_location.pop()
-  save_location = str(backSlash.join(save_location))
+  save_location = os.path.join((save_location))
   self.save_location_nofile = save_location
   #self.save_location_nofile doesn't contain the blabla.zip
+
+ def prepare_staging_directory(self):
   if not os.path.exists(self.save_location):
    #We need to make all folders but the last one
    os.makedirs(self.save_location_nofile)
@@ -50,7 +49,7 @@ class AutoUpdater(object):
 
  def start_update(self):
   """Called to start the whole process"""
-  print "URL: " + self.URL + "   SL:  " + self.save_location
+  logging.debug("URL: %s   SL: %s" % (self.URL, self.save_location))
   Listy = urllib.urlretrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
   if self.MD5:
    #Check the MD5
@@ -66,16 +65,15 @@ class AutoUpdater(object):
 
  def download_complete(self, location):
   """Called when the file is done downloading, and MD5 has been successfull"""
-  CurD = os.getcwd() #Store our current working directory (of main app)
-  print "DOWNLOAD COMPLETE: " + str(location)
-  zippy = ZipFile(location, 'r')
+  logging.debug("Download complete.")
+  zippy = ZipFile(location, mode='r', pwd=self.password)
   Pathy = os.path.join(self.save_location_nofile, os.path.basename(location).strip(".zip"))
   zippy.extractall(Pathy)
   BootStr = os.path.join(self.save_location_nofile, self.bootstrapper) #where we will find our bootstrapper
   shutil.move(os.path.join(Pathy, self.bootstrapper), self.save_location_nofile) #move bootstrapper
   os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
   if platform.system() == "Windows": 
-    subprocess.Popen(r'"%s" -l "%s" -d "%s" "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"), str(os.getpid())))
+    subprocess.Popen(r'"%s" -l "%s" -d "%s" "%s"' % (BootStr, self.app_path, os.path.basename(location).strip(".zip"), str(os.getpid())))
   else:
     subprocess.Popen([r'sh "%s" -l "%s" -d "%s" "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"), str(os.getpid()))], shell=True)
   self.complete = 1
@@ -97,5 +95,3 @@ def find_update_url(URL, version):
   json_p = json.loads(json_str)
   if json_p['current_version'] > version:
     return json_p['downloads'][platform.system()]
-
-
