@@ -70,15 +70,23 @@ class AutoUpdater(object):
   """Called when the file is done downloading, and MD5 has been successfull"""
   logger.debug("Download complete.")
   zippy = ZipFile(location, mode='r')
-  Pathy = os.path.join(self.save_directory, os.path.basename(location).strip(".zip"))
-  zippy.extractall(Pathy, pwd=self.password)
-  BootStr = os.path.join(self.save_directory, self.bootstrapper) #where we will find our bootstrapper
-  shutil.move(os.path.join(Pathy, self.bootstrapper), self.save_directory) #move bootstrapper
-  os.chmod(BootStr, stat.S_IRUSR|stat.S_IXUSR)
+  extracted_path = os.path.join(self.save_directory, os.path.basename(location).strip(".zip"))
+  zippy.extractall(extracted_path, pwd=self.password)
+  bootstrapper_path = os.path.join(self.save_directory, self.bootstrapper) #where we will find our bootstrapper
+  old_bootstrapper_path = os.path.join(extracted_path, self.bootstrapper)
+  if os.path.exists(bootstrapper_path):
+   os.chmod(bootstrapper_path, 666)
+   os.remove(bootstrapper_path)
+  shutil.move(old_bootstrapper_path, self.save_directory) #move bootstrapper
+  os.chmod(bootstrapper_path, stat.S_IRUSR|stat.S_IXUSR)
   if platform.system() == "Windows": 
-    subprocess.Popen(r'"%s" -l "%s" -d "%s" "%s"' % (BootStr, self.app_path, os.path.basename(location).strip(".zip"), str(os.getpid())))
+   bootstrapper_command = r'"%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, os.path.basename(extracted_path), str(os.getpid()))
+   shell = False  
   else:
-    subprocess.Popen([r'sh "%s" -l "%s" -d "%s" "%s"' % (BootStr, CurD, os.path.basename(location).strip(".zip"), str(os.getpid()))], shell=True)
+   bootstrapper_command = r'sh "%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, os.path.basename(extracted_path), str(os.getpid()))
+   shell = True
+  logging.debug("Final bootstrapper command: %r" % bootstrapper_command)
+  subprocess.Popen([bootstrapper_command], shell=shell)
   self.complete = 1
   if callable(self.finish_callback):
    self.finish_callback()
