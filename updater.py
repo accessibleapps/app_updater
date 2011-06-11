@@ -1,5 +1,9 @@
 #AutoUpdater
 #Released under an MIT license
+
+import logging
+logger = logging.getLogger('updater')
+
 import urllib
 import urllib2
 import hashlib
@@ -49,7 +53,7 @@ class AutoUpdater(object):
 
  def start_update(self):
   """Called to start the whole process"""
-  logging.debug("URL: %s   SL: %s" % (self.URL, self.save_location))
+  logger.debug("URL: %s   SL: %s" % (self.URL, self.save_location))
   Listy = urllib.urlretrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
   if self.MD5:
    #Check the MD5
@@ -65,7 +69,7 @@ class AutoUpdater(object):
 
  def download_complete(self, location):
   """Called when the file is done downloading, and MD5 has been successfull"""
-  logging.debug("Download complete.")
+  logger.debug("Download complete.")
   zippy = ZipFile(location, mode='r', pwd=self.password)
   Pathy = os.path.join(self.save_location_nofile, os.path.basename(location).strip(".zip"))
   zippy.extractall(Pathy)
