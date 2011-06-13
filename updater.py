@@ -8,7 +8,10 @@ from urllib import FancyURLopener, URLopener
 import urllib2
 import hashlib
 import os
-from zipfile import ZipFile
+try:
+ from czipfile import ZipFile
+except ImportError:
+ from zipfile import ZipFile
 import subprocess
 import stat
 import platform
@@ -17,7 +20,7 @@ import json
 
 class AutoUpdater(object):
 
- def __init__(self, URL, save_location, bootstrapper, app_path, password=None, MD5=None, percentage_callback=None, finish_callback=None):
+ def __init__(self, URL, save_location, bootstrapper, app_path, postexecute=None, password=None, MD5=None, percentage_callback=None, finish_callback=None):
   """Supply a URL/location/bootstrapper filename to download a zip file from
      The finish_callback argument should be a Python function it'll call when done"""
   #Let's download the file using urllib
@@ -27,6 +30,7 @@ class AutoUpdater(object):
   self.URL = URL
   self.bootstrapper = bootstrapper
   self.app_path = app_path
+  self.postexecute = postexecute
   self.password = password  
   self.MD5 = MD5
   self.save_location = save_location
@@ -80,13 +84,13 @@ class AutoUpdater(object):
   shutil.move(old_bootstrapper_path, self.save_directory) #move bootstrapper
   os.chmod(bootstrapper_path, stat.S_IRUSR|stat.S_IXUSR)
   if platform.system() == "Windows": 
-   bootstrapper_command = r'"%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, os.path.basename(extracted_path), str(os.getpid()))
+   bootstrapper_command = r'"%s" "%s" "%s" "%s" "%s"' % (bootstrapper_path, os.getpid(), extracted_path, self.app_path, self.postexecute)
    shell = False  
   else:
-   bootstrapper_command = r'sh "%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, os.path.basename(extracted_path), str(os.getpid()))
+   bootstrapper_command = [r'sh "%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, extracted_path, str(os.getpid()))]
    shell = True
   logging.debug("Final bootstrapper command: %r" % bootstrapper_command)
-  subprocess.Popen([bootstrapper_command], shell=shell)
+  subprocess.Popen(bootstrapper_command, shell=shell)
   self.complete = 1
   if callable(self.finish_callback):
    self.finish_callback()
