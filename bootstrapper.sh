@@ -1,15 +1,33 @@
 #!/bin/bash  
-#bootstrapper.sh
-PIDD="$5"
-while kill -0 $PIDD 2>/dev/null; do sleep 1; done
-# Absolute path to this script. /home/user/bin/foo.sh
-SCRIPT=$(cd ${0%/*} && echo $PWD/${0##*/})
-# Absolute path this script is in. /home/user/bin
-SCRIPTPATH=`dirname $SCRIPT`
-POSPAR1="$1" #-l
-POSPAR2="$2" #location
-POSPAR3="$3" #-d
-POSPAR4="$4" #directory
-cp -r -f $SCRIPTPATH/$4/* $2
-rm -r -f $SCRIPTPATH/$4
-exit 1
+MoveToTarget() {
+	#This takes to 2 arguments: source and target
+        echo ""$1"  "$2""
+	cp -rf "$1"/* "$2"
+	rm -r "$1"
+}
+
+WaitForProcessToEnd() {
+	#This takes 1 argument. The PID to wait for
+	#Unlike the AutoIt version, this sleeps 1 second
+	while [ $(kill -0 "$1") ]; do
+    		sleep 1
+  	done
+}
+
+RunApplication() {
+	#This takes 1 application, the path to the thing to execute
+	python "$1"
+}
+
+#our main code block
+pid="$1"
+SourcePath="$2"
+DestPath="$3"
+ToExecute="$4"
+WaitForProcessToEnd $pid
+MoveToTarget $SourcePath $DestPath
+RunApplication $ToExecute
+exit
+
+
+
