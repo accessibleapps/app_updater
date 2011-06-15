@@ -29,8 +29,28 @@ class AutoUpdater(object):
   self.percentage_callback = percentage_callback or self.print_percentage_callback
   self.URL = URL
   self.bootstrapper = bootstrapper
+  #The application path on the Mac should be 1 directory up from where the .app file is.
+  tempstr = ""
+  if (platform.system() == "Darwin"):
+    for x in (app_path.split("/")):
+      if (".app" in x):
+        break
+      else:
+        tempstr = os.path.join(tempstr, x)
+    app_path = "/" + tempstr + "/"
+    #The post-execution path should include the .app file
+    tempstr = ""
+    for x in (postexecute.split("/")):
+      if (".app" in x):
+        tempstr = os.path.join(tempstr, x)
+        break
+      else:
+        tempstr = os.path.join(tempstr, x)
+    postexecute = "/" + tempstr
   self.app_path = app_path
   self.postexecute = postexecute
+  logging.info("apppath: " + str(app_path))
+  logging.info("postexecute: " + str(postexecute))
   self.password = password  
   self.MD5 = MD5
   self.save_location = save_location
@@ -87,10 +107,11 @@ class AutoUpdater(object):
    bootstrapper_command = r'"%s" "%s" "%s" "%s" "%s"' % (bootstrapper_path, os.getpid(), extracted_path, self.app_path, self.postexecute)
    shell = False  
   else:
-   bootstrapper_command = [r'sh "%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, extracted_path, str(os.getpid()))]
+   #bootstrapper_command = [r'sh "%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, extracted_path, str(os.getpid()))]
+   bootstrapper_command = r'"%s" "%s" "%s" "%s" "%s"' % (bootstrapper_path, os.getpid(), extracted_path, self.app_path, self.postexecute)
    shell = True
   logging.debug("Final bootstrapper command: %r" % bootstrapper_command)
-  subprocess.Popen(bootstrapper_command, shell=shell)
+  subprocess.Popen([bootstrapper_command], shell=shell)
   self.complete = 1
   if callable(self.finish_callback):
    self.finish_callback()
