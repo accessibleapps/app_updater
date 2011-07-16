@@ -16,6 +16,10 @@ func RunApplication($executable)
 EndFunc
 
 func main()
+ if ($CmdLine[0] < 4) then
+  MsgBox(48, "Update Bootstrapper", "Please note: this is a stand-alone bootstrapper for the autoupdate facility. It cannot be run independently.")
+  return
+ endif
  $pid = $CmdLine[1]
  $SourcePath = $CmdLine[2]
  $DestPath = $CmdLine[3]
