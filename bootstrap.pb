@@ -50,8 +50,21 @@ execute(prg)
 
 ; IDE Options = PureBasic 4.51 (Windows - x86)
 ; ExecutableFormat = Console
-; CursorPosition = 34
+; CursorPosition = 40
+; FirstLine = 3
 ; Folding = w
 ; EnableUnicode
 ; EnableXP
+; EnableAdmin
 ; Executable = bootstrap.exe
+; IncludeVersionInfo
+; VersionField0 = 1,2,0
+; VersionField1 = 5,0,1
+; VersionField2 = Mongoose Enterprises
+; VersionField3 = Autoupdate Bootstrapper
+; VersionField4 = 2.0
+; VersionField5 = 1.2.1
+; VersionField6 = Moves files around and relaunches the updated application.
+; VersionField7 = bootstrap
+; VersionField8 = bootstrap.pb
+; VersionField17 = 0409 English (United States)
