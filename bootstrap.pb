@@ -49,14 +49,14 @@ moveToTarget(source, dest)
 execute(prg)
 
 ; IDE Options = PureBasic 4.51 (Windows - x86)
-; ExecutableFormat = Console
 ; CursorPosition = 40
 ; FirstLine = 3
 ; Folding = w
 ; EnableUnicode
 ; EnableXP
-; EnableAdmin
+; EnableUser
 ; Executable = bootstrap.exe
+; Compiler = PureBasic 4.51 (Windows - x86)
 ; IncludeVersionInfo
 ; VersionField0 = 1,2,0
 ; VersionField1 = 5,0,1

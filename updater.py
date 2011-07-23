@@ -18,6 +18,9 @@ import stat
 import platform
 import shutil
 import json
+if platform.system() == 'Windows':
+ import win32api
+
 
 class AutoUpdater(object):
 
@@ -105,14 +108,15 @@ class AutoUpdater(object):
   shutil.move(old_bootstrapper_path, self.save_directory) #move bootstrapper
   os.chmod(bootstrapper_path, stat.S_IRUSR|stat.S_IXUSR)
   if platform.system() == "Windows": 
-   bootstrapper_command = r'"%s" "%s" "%s" "%s" "%s"' % (bootstrapper_path, os.getpid(), extracted_path, self.app_path, self.postexecute)
-   shell = False  
+   bootstrapper_command = r'%s' % bootstrapper_path
+   bootstrapper_args = r'"%s" "%s" "%s" "%s"' % (os.getpid(), extracted_path, self.app_path, self.postexecute)
+   win32api.ShellExecute(0, 'open', bootstrapper_command, bootstrapper_args, "", 5)
   else:
    #bootstrapper_command = [r'sh "%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, extracted_path, str(os.getpid()))]
    bootstrapper_command = r'"%s" "%s" "%s" "%s" "%s"' % (bootstrapper_path, os.getpid(), extracted_path, self.app_path, self.postexecute)
    shell = True
-  logging.debug("Final bootstrapper command: %r" % bootstrapper_command)
-  subprocess.Popen([bootstrapper_command], shell=shell)
+   #logging.debug("Final bootstrapper command: %r" % bootstrapper_command)
+   subprocess.Popen([bootstrapper_command], shell=shell)
   self.complete = 1
   if callable(self.finish_callback):
    self.finish_callback()
