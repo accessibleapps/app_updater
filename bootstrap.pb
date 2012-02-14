@@ -23,13 +23,24 @@ For i = 0 To nPids-1
 Next
     ProcedureReturn 0
   EndProcedure
-Procedure WaitForProcessToEnd(pid.l, intervalMS.l)
-  While processExists(pid)
-    Delay(intervalMS)
-  Wend
+Procedure WaitForProcessToEnd(pid.l, timeout.l)
+  Protected h=OpenProcess_(#SYNCHRONIZE, 0, pid)
+  If h
+    WaitForSingleObject_(h, timeout)
+    CloseHandle_(h)
+  EndIf
 EndProcedure
 Procedure execute(program.s)
   ShellExecute_(#Null, "open", program, #Null, #Null, #SW_NORMAL)
+EndProcedure
+Procedure kill(pid, exitcode)
+  Protected handle = OpenProcess_(#PROCESS_TERMINATE, 0, pid)
+If handle > 0  
+  Protected r=TerminateProcess_(handle, exitcode)
+  CloseHandle_(handle)
+  ProcedureReturn r
+EndIf
+ProcedureReturn 0
 EndProcedure
 
 Define sd.s{#MAX_PATH}
@@ -45,16 +56,18 @@ Define source.s = ProgramParameter(1)
 Define dest.s = ProgramParameter(2)
 Define prg.s = ProgramParameter(3)
 WaitForProcessToEnd(pid, 500)
+kill(pid, 1)
+WaitForProcessToEnd(pid, 500)
 moveToTarget(source, dest)
 execute(prg)
 
 ; IDE Options = PureBasic 4.51 (Windows - x86)
-; CursorPosition = 40
-; FirstLine = 3
-; Folding = w
+; CursorPosition = 62
+; FirstLine = 7
+; Folding = 1
 ; EnableUnicode
 ; EnableXP
-; EnableUser
+; EnableAdmin
 ; Executable = bootstrap.exe
 ; Compiler = PureBasic 4.51 (Windows - x86)
 ; IncludeVersionInfo
