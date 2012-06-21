@@ -21,11 +21,11 @@ import shutil
 import json
 if platform.system() == 'Windows':
  import win32api
-
+import sign_utils
 
 class AutoUpdater(object):
 
- def __init__(self, URL, save_location, bootstrapper, app_path, postexecute=None, password=None, MD5=None, percentage_callback=None, finish_callback=None):
+ def __init__(self, URL, save_location, bootstrapper, app_path, postexecute=None, password=None, MD5=None, percentage_callback=None, finish_callback=None, key=None, signature=None):
   """Supply a URL/location/bootstrapper filename to download a zip file from
      The finish_callback argument should be a Python function it'll call when done"""
   #Let's download the file using urllib
@@ -34,6 +34,8 @@ class AutoUpdater(object):
   self.percentage_callback = percentage_callback or self.print_percentage_callback
   self.URL = URL
   self.bootstrapper = bootstrapper
+  self.key = key #public key
+  self.signature = signature #The signature we expect to get
   #The application path on the Mac should be 1 directory up from where the .app file is.
   tempstr = ""
   if (platform.system() == "Darwin"):
@@ -88,6 +90,12 @@ class AutoUpdater(object):
    if self.MD5File(location) != self.MD5:
     #ReDownload
     self.start_update()
+  if self.key:
+   if not sign_utils.verify(self.save_location, self.key, self.signature):
+    logger.debug("Signature verification failed for %s" % self.save_location)
+    return
+   else:
+    logger.debug("Signature verification succeeded for %s" % self.save_location)
   self.download_complete(Listy[0])
 
  def MD5File(self, filename):
@@ -128,31 +136,34 @@ class AutoUpdater(object):
   except:
    logger.exception("Unable to clean update directory.")
 
-def find_update_url(URL, version):
- """Return a URL to an update of the application for the current platform at the given URL if one exists, or None""
-  Assumes Windows, Linux, or Mac"""
+def get_update_info(URL, version):
+ """Return update info for the current platform, including URL and signature. If no update is available, return an empty dict.
+ Assumes Windows, Linux, or Mac"""
+ info = {}
  response = urllib2.urlopen(URL)
  json_str = response.read().strip("\n")
  json_p = json.loads(json_str)
  if is_newer(version, json_p['current_version']):
-  return json_p['downloads'][platform.system()]
+  info['URL'] = json_p['downloads'][platform.system()]
+  if 'signatures' in json_p and platform.system() in json_p['signatures']:
+   info['signature'] = json_p['signatures'][platform.system()]
+ return info
 
-
-  
 class CustomURLOpener(FancyURLopener):
  def http_error_default(*a, **k):
   return URLopener.http_error_default(*a, **k)
 
 
-def check_for_update(update_endpoint, password, app_name, app_version, finish_callback=None):
+def check_for_update(update_endpoint, password, app_name, app_version, finish_callback=None, key=None):
  if not paths.is_frozen():
   return
- url = find_update_url(update_endpoint, app_version)
- if url is None:
+ info = get_update_info(update_endpoint, app_version)
+ if info is None:
   logger.info("No update currently available.")
   return
+ sig = info.get('signature', None)
  new_path = os.path.join(paths.app_data_path(app_name), 'updates')
  new_path = os.path.join(new_path, 'update.zip') 
- app_updater = AutoUpdater(url, new_path, 'bootstrap.exe', app_path=paths.app_path(), postexecute=paths.executable_path(), password=password, finish_callback=finish_callback)
+ app_updater = AutoUpdater(info['URL'], new_path, 'bootstrap.exe', app_path=paths.app_path(), postexecute=paths.executable_path(), password=password, finish_callback=finish_callback, key=key, signature=sig)
  app_updater.start_update()
  
