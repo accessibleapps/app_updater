@@ -154,16 +154,20 @@ class CustomURLOpener(FancyURLopener):
   return URLopener.http_error_default(*a, **k)
 
 
-def check_for_update(update_endpoint, password, app_name, app_version, finish_callback=None, key=None):
+def check_for_update(update_endpoint, password, app_name, app_version, finish_callback=None, percentage_callback=None, key=None):
  if not paths.is_frozen():
   return
  info = get_update_info(update_endpoint, app_version)
  if info is None:
   logger.info("No update currently available.")
   return
+ if (platform.system=='Windows'):
+  bootstrapper ='bootstrap.exe'
+ else:
+  bootstrapper = 'bootstrap.sh'
  sig = info.get('signature', None)
  new_path = os.path.join(paths.app_data_path(app_name), 'updates')
  new_path = os.path.join(new_path, 'update.zip') 
- app_updater = AutoUpdater(info['URL'], new_path, 'bootstrap.exe', app_path=paths.app_path(), postexecute=paths.executable_path(), password=password, finish_callback=finish_callback, key=key, signature=sig)
+ app_updater = AutoUpdater(info['URL'], new_path, bootstrapper, app_path=paths.app_path(), postexecute=paths.executable_path(), password=password, finish_callback=finish_callback, percentage_callback=percentage_callback, key=key, signature=sig)
  app_updater.start_update()
  
