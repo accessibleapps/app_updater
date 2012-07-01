@@ -161,7 +161,7 @@ def check_for_update(update_endpoint, password, app_name, app_version, finish_ca
  if info is None:
   logger.info("No update currently available.")
   return
- if (platform.system=='Windows'):
+ if (platform.system()=='Windows'):
   bootstrapper ='bootstrap.exe'
  else:
   bootstrapper = 'bootstrap.sh'
