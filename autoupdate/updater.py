@@ -21,7 +21,7 @@ import shutil
 import json
 if platform.system() == 'Windows':
  import win32api
-import sign_utils
+import signing_utils
 
 class AutoUpdater(object):
 
@@ -91,11 +91,11 @@ class AutoUpdater(object):
     #ReDownload
     self.start_update()
   if self.key:
-   if not sign_utils.verify(self.save_location, self.key, self.signature):
-    logger.debug("Signature verification failed for %s" % self.save_location)
+   if not signing_utils.verify(self.save_location, self.key, self.signature):
+    logger.critical("Signature verification failed for %s" % self.save_location)
     return
    else:
-    logger.debug("Signature verification succeeded for %s" % self.save_location)
+    logger.info("Signature verification succeeded for %s" % self.save_location)
   self.download_complete(Listy[0])
 
  def MD5File(self, filename):
