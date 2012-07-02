@@ -158,7 +158,7 @@ def check_for_update(update_endpoint, password, app_name, app_version, finish_ca
  if not paths.is_frozen():
   return
  info = get_update_info(update_endpoint, app_version)
- if info is None:
+ if info == {}:
   logger.info("No update currently available.")
   return
  if (platform.system()=='Windows'):
