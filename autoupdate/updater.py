@@ -84,7 +84,7 @@ class AutoUpdater(object):
   """Called to start the whole process"""
   logger.debug("URL: %s   SL: %s" % (self.URL, self.save_location))
   self.prepare_staging_directory()
-  Listy = CustomURLOpener().retrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
+  download_result = CustomURLOpener().retrieve(self.URL, self.save_location, reporthook=self.transfer_callback)
   if self.MD5:
    #Check the MD5
    if self.MD5File(location) != self.MD5:
@@ -96,38 +96,43 @@ class AutoUpdater(object):
     return
    else:
     logger.info("Signature verification succeeded for %s" % self.save_location)
-  self.download_complete(Listy[0])
+  self.download_complete(download_result[0])
 
- def MD5File(self, filename):
-  "Custom function that will get the Md5 sum of our file"
+ @staticmethod
+ def MD5File(filename):
+  "Function which will return the Md5 sum of our file"
   with open(filename, 'rb') as f:
    return hashlib.md5(f).hexdigest()
 
  def download_complete(self, location):
-  """Called when the file is done downloading, and MD5 has been successfull"""
   logger.debug("Download complete.")
-  zippy = ZipFile(location, mode='r')
+  zip_file = ZipFile(location, mode='r')
   extracted_path = os.path.join(self.save_directory, os.path.basename(location).strip(".zip"))
-  zippy.extractall(extracted_path, pwd=self.password)
-  bootstrapper_path = os.path.join(self.save_directory, self.bootstrapper) #where we will find our bootstrapper
-  old_bootstrapper_path = os.path.join(extracted_path, self.bootstrapper)
-  if os.path.exists(bootstrapper_path):
-   os.chmod(bootstrapper_path, 666)
-   os.remove(bootstrapper_path)
-  shutil.move(old_bootstrapper_path, self.save_directory) #move bootstrapper
-  os.chmod(bootstrapper_path, stat.S_IRUSR|stat.S_IXUSR)
-  if platform.system() == "Windows": 
-   bootstrapper_command = r'%s' % bootstrapper_path
-   bootstrapper_args = r'"%s" "%s" "%s" "%s"' % (os.getpid(), extracted_path, self.app_path, self.postexecute)
-   win32api.ShellExecute(0, 'open', bootstrapper_command, bootstrapper_args, "", 5)
-  else:
-   #bootstrapper_command = [r'sh "%s" -l "%s" -d "%s" "%s"' % (bootstrapper_path, self.app_path, extracted_path, str(os.getpid()))]
-   bootstrapper_command = r'"%s" "%s" "%s" "%s" "%s"' % (bootstrapper_path, os.getpid(), extracted_path, self.app_path, self.postexecute)
-   shell = True
-   subprocess.Popen([bootstrapper_command], shell=shell)
+  zip_file.extractall(extracted_path, pwd=self.password)
+  zip_file.close()
+  self.cleanup()
   self.complete = 1
   if callable(self.finish_callback):
    self.finish_callback()
+  self.run_bootstrapper()
+
+ def run_bootstrapper(self):
+  previous_bootstrapper = os.path.join(self.save_directory, self.bootstrapper) #where we will find our bootstrapper
+  bootstrapper_path = os.path.join(extracted_path, self.bootstrapper)
+  if os.path.exists(previous_bootstrapper):
+   os.chmod(previous_bootstrapper, 666)
+   os.remove(previous_bootstrapper)
+  bootstrapper_executable = os.path.split(bootstrapper_path)[-1]
+  shutil.move(bootstrapper_path, self.save_directory) #move bootstrapper
+  new_bootstrapper = os.path.join(self.save_location, bootstrapper_executable)
+  os.chmod(new_bootstrapper, stat.S_IRUSR|stat.S_IXUSR)
+  if platform.system() == "Windows": 
+   bootstrapper_command = r'%s' % new_bootstrapper
+   bootstrapper_args = r'"%s" "%s" "%s" "%s"' % (os.getpid(), extracted_path, self.app_path, self.postexecute)
+   win32api.ShellExecute(0, 'open', bootstrapper_command, bootstrapper_args, "", 5)
+  else:
+   bootstrapper_command = r'"%s" "%s" "%s" "%s" "%s"' % (new_bootstrapper, os.getpid(), extracted_path, self.app_path, self.postexecute)
+   subprocess.Popen([bootstrapper_command], shell=True)
 
  def cleanup(self):
   """Delete stuff"""
