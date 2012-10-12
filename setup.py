@@ -14,6 +14,7 @@ setup(
  ]},
  install_requires = [
   'platform_utils',
+    'signing-utils',
  ],
  classifiers = [
   'Development Status :: 4 - Beta',
