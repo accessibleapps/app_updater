@@ -25,12 +25,12 @@ import signing_utils
 
 class AutoUpdater(object):
 
- def __init__(self, URL, save_location, bootstrapper, app_path, postexecute=None, password=None, MD5=None, percentage_callback=None, finish_callback=None, key=None, signature=None):
+ def __init__(self, URL, save_location, bootstrapper, app_path, postexecute=None, password=None, MD5=None, percentage_callback=None, download_complete_callback=None, key=None, signature=None):
   """Supply a URL/location/bootstrapper filename to download a zip file from
-     The finish_callback argument should be a Python function it'll call when done"""
+     The download_complete_callback argument should be a Python function it'll call when done"""
   #Let's download the file using urllib
   self.complete = 0
-  self.finish_callback = finish_callback #What to do on exit
+  self.download_complete_callback = download_complete_callback #What to do on exit
   self.percentage_callback = percentage_callback or self.print_percentage_callback
   self.URL = URL
   self.bootstrapper = bootstrapper
@@ -61,7 +61,7 @@ class AutoUpdater(object):
   self.password = password  
   self.MD5 = MD5
   self.save_location = save_location
-  #self.save_location contains the full path, including the blabla.zip
+  #self.save_location is the full path to the downloaded update archive
   self.save_directory = os.path.join(*os.path.split(save_location)[:-1])
   #self.save_directory doesn't contain the blabla.zip
 
@@ -112,8 +112,7 @@ class AutoUpdater(object):
   zip_file.close()
   self.cleanup()
   self.complete = 1
-  if callable(self.finish_callback):
-   self.finish_callback()
+  call_callback(self.download_complete_callback)
   self.run_bootstrapper()
 
  def run_bootstrapper(self):
@@ -159,13 +158,25 @@ class CustomURLOpener(FancyURLopener):
   return URLopener.http_error_default(*a, **k)
 
 
-def check_for_update(update_endpoint, password, app_name, app_version, finish_callback=None, percentage_callback=None, key=None):
+def call_callback(callback, *args, **kwargs):
+ if callback is None:
+  return
+ res = None
+ try:
+  res = callback(*args, **kwargs)
+ except Exception as e:
+  logger.exception("Error calling callback %r with args %r and kwargs %r" % (callback, args, kwargs))
+ return res
+
+
+def check_for_update(update_endpoint, password, app_name, app_version, download_complete_callback=None, percentage_callback=None, update_available_callback=None, update_complete_callback=None, key=None):
  if not paths.is_frozen():
   return
  info = get_update_info(update_endpoint, app_version)
  if info == {}:
   logger.info("No update currently available.")
   return
+ call_callback(update_available_callback)
  if (platform.system()=='Windows'):
   bootstrapper ='bootstrap.exe'
  else:
@@ -173,6 +184,6 @@ def check_for_update(update_endpoint, password, app_name, app_version, finish_ca
  sig = info.get('signature', None)
  new_path = os.path.join(paths.app_data_path(app_name), 'updates')
  new_path = os.path.join(new_path, 'update.zip') 
- app_updater = AutoUpdater(info['URL'], new_path, bootstrapper, app_path=paths.app_path(), postexecute=paths.executable_path(), password=password, finish_callback=finish_callback, percentage_callback=percentage_callback, key=key, signature=sig)
+ app_updater = AutoUpdater(info['URL'], new_path, bootstrapper, app_path=paths.app_path(), postexecute=paths.executable_path(), password=password, download_complete_callback=download_complete_callback, percentage_callback=percentage_callback, key=key, signature=sig)
  app_updater.start_update()
- 
+ call_callback(update_complete_callback)
