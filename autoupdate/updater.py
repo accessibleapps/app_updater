@@ -148,7 +148,11 @@ def get_update_info(URL, version):
  json_str = response.read().strip("\n")
  json_p = json.loads(json_str)
  if is_newer(version, json_p['current_version']):
-  info['URL'] = json_p['downloads'][platform.system()]
+  try:
+   #This is incase we want to only update one platform
+   info['URL'] = json_p['downloads'][platform.system()]
+  except KeyError:
+   return {}
   if 'signatures' in json_p and platform.system() in json_p['signatures']:
    info['signature'] = json_p['signatures'][platform.system()]
  return info
