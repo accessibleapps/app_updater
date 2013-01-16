@@ -1,7 +1,13 @@
+import platform
 from glob import glob
 from os.path import abspath, join
 
-def py2exe_datafiles():
+def find_datafiles():
  import autoupdate
- path = abspath(join(autoupdate.__path__[0], 'bootstrappers', '*.exe'))
+ system = platform.system()
+ if system == 'Windows':
+  file_ext = '*.exe'
+ else:
+  file_ext = '*.sh'
+ path = abspath(join(autoupdate.__path__[0], 'bootstrappers', file_ext))
  return [('', glob(path))]
