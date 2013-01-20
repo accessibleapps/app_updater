@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
-from glob import glob
 
-__version__ = 0.02
+__version__ = 0.2
 
 setup(
  name = 'autoupdate',
@@ -14,7 +13,6 @@ setup(
  ]},
  install_requires = [
   'platform_utils',
-    'signing-utils',
  ],
  classifiers = [
   'Development Status :: 4 - Beta',
