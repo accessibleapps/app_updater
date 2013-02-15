@@ -74,19 +74,24 @@ def move_bootstrap(extracted_path):
  return new_bootstrap_path
 
 def execute_bootstrap(bootstrap_path, source_path):
- command = r'"%s" "%s" "%s" "%s"' % (os.getpid(), source_path, paths.app_path(), paths.executable_path())
+ arguments = r'"%s" "%s" "%s" "%s"' % (os.getpid(), source_path, paths.app_path(), paths.executable_path())
  if platform.system() == 'Windows':
   import win32api
-  win32api.ShellExecute(0, 'open', bootstrap_path, command, "", 5)
+  win32api.ShellExecute(0, 'open', bootstrap_path, arguments, '', 5)
  else:  
   import subprocess
-  subprocess.Popen(['%s %s' % (bootstrap_path, command)], shell=True)
+  make_executable(bootstrap_path)
+  subprocess.Popen(['%s %s' % (bootstrap_path, arguments)], shell=True)
  logger.info("Bootstrap executed")
 
 def bootstrap_name():
  if platform.system() == 'Windows': return 'bootstrap.exe'
  if platform.system() == 'Darwin': return 'bootstrap-mac.sh'
  return 'bootstrap-lin.sh'
+
+def make_executable(path):
+ st = os.stat(path)
+ os.chmod('somefile', st.st_mode | stat.S_IEXEC)
 
 def call_callback(callback, *args, **kwargs):
  try:
