@@ -36,7 +36,7 @@ def find_update(endpoint, version):
  response = requests.get(endpoint)
  response.raise_for_status()
  content = response.json()
- if str(content['current_version']) > str(version):
+ if str(content['current_version']) > str(version) and platform.system() in content['downloads']:
   logger.info("A new update is available. Version %s" % content['current_version'])
   return content['downloads'].get(platform.system())
 
@@ -66,9 +66,11 @@ def extract_update(update_archive, destination, password=None):
 
 def move_bootstrap(extracted_path):
  working_path = os.path.abspath(os.path.join(extracted_path, '..'))
+ if platform.system() == 'Darwin':
+  extracted_path = os.path.join(extracted_path, 'Contents', 'Resources')
  downloaded_bootstrap = os.path.join(extracted_path, bootstrap_name())
- bootstrap_path = os.path.join(working_path, bootstrap_name())
- os.rename(downloaded_bootstrap, bootstrap_path)
+ new_bootstrap_path = os.path.join(working_path, bootstrap_name())
+ os.rename(downloaded_bootstrap, new_bootstrap_path)
  return bootstrap_path
 
 def execute_bootstrap(bootstrap_path, source_path):
