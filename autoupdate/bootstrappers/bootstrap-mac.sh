@@ -17,7 +17,7 @@ WaitForProcessToEnd() {
 RunApplication() {
 	#This takes 1 application, the path to the thing to execute
 	echo "toExec: "$1""
-	open "$1"
+	exec "$1"
 }
 
 #our main code block
@@ -28,8 +28,4 @@ ToExecute="$4"
 WaitForProcessToEnd $pid
 MoveToTarget "$SourcePath" "$DestPath"
 RunApplication "$ToExecute"
-osascript<<END
-tell application "Terminal"
-quit
-end tell
-END
+exit
