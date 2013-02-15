@@ -79,6 +79,7 @@ def execute_bootstrap(bootstrap_path, source_path):
   import win32api
   win32api.ShellExecute(0, 'open', bootstrap_path, command, "", 5)
  else:  
+  import subprocess
   subprocess.Popen(['%s %s' % (bootstrap_path, command)], shell=True)
  logger.info("Bootstrap executed")
 
