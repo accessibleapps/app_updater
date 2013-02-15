@@ -28,7 +28,8 @@ ToExecute="$4"
 WaitForProcessToEnd $pid
 MoveToTarget "$SourcePath" "$DestPath"
 RunApplication "$ToExecute"
-exit
-
-
-
+osascript<<END
+tell application "Terminal"
+quit
+end tell
+END
