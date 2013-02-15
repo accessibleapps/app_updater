@@ -91,7 +91,7 @@ def bootstrap_name():
 
 def make_executable(path):
  st = os.stat(path)
- os.chmod('somefile', st.st_mode | stat.S_IEXEC)
+ os.chmod(path, st.st_mode | stat.S_IEXEC)
 
 def call_callback(callback, *args, **kwargs):
  try:
