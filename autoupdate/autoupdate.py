@@ -71,7 +71,7 @@ def move_bootstrap(extracted_path):
  downloaded_bootstrap = os.path.join(extracted_path, bootstrap_name())
  new_bootstrap_path = os.path.join(working_path, bootstrap_name())
  os.rename(downloaded_bootstrap, new_bootstrap_path)
- return bootstrap_path
+ return new_bootstrap_path
 
 def execute_bootstrap(bootstrap_path, source_path):
  command = r'"%s" "%s" "%s" "%s"' % (os.getpid(), source_path, paths.app_path(), paths.executable_path())
