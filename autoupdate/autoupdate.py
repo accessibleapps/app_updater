@@ -90,6 +90,7 @@ def bootstrap_name():
  return 'bootstrap-lin.sh'
 
 def make_executable(path):
+ import stat
  st = os.stat(path)
  os.chmod(path, st.st_mode | stat.S_IEXEC)
 
