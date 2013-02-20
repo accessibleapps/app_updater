@@ -14,8 +14,9 @@ except ImportError:
 
 from platform_utils import paths
 
-def perform_update(endpoint, current_version, password=None, update_available_callback=None, progress_callback=None, update_complete_callback=None):
- available_update = find_update(endpoint, current_version)
+def perform_update(endpoint, current_version, app_name='', password=None, update_available_callback=None, progress_callback=None, update_complete_callback=None):
+ requests_session = create_requests_session(app_name=app_name, version=current_version)
+ available_update = find_update(endpoint, current_version, requests_session=requests_session)
  if not available_update:
   return
  if callable(update_available_callback) and not update_available_callback(): #update_available_callback should return a falsy value to stop the process
@@ -24,7 +25,7 @@ def perform_update(endpoint, current_version, password=None, update_available_ca
  base_path = tempfile.mkdtemp()
  download_path = os.path.join(base_path, 'update.zip')
  update_path = os.path.join(base_path, 'update')
- downloaded = download_update(available_update, download_path, progress_callback=progress_callback)
+ downloaded = download_update(available_update, download_path, requests_session=requests_session, progress_callback=progress_callback)
  extracted = extract_update(downloaded, update_path, password=password)
  bootstrap_path = move_bootstrap(extracted)
  execute_bootstrap(bootstrap_path, extracted)
@@ -32,18 +33,26 @@ def perform_update(endpoint, current_version, password=None, update_available_ca
  if callable(update_complete_callback):
   update_complete_callback()
 
-def find_update(endpoint, version):
- response = requests.get(endpoint)
+def create_requests_session(app_name=None, version=None):
+ user_agent = requests.session().headers['User-Agent']
+ if app_name:
+  user_agent = '%s + %s / %d' % (user_agent, app_name, version)
+ session = requests.session()
+ session.headers = {'User-Agent': user_agent}
+ return session
+
+def find_update(endpoint, version, requests_session):
+ response = requests_session.get(endpoint)
  response.raise_for_status()
  content = response.json()
  if str(content['current_version']) > str(version) and platform.system() in content['downloads']:
   logger.info("A new update is available. Version %s" % content['current_version'])
   return content['downloads'].get(platform.system())
 
-def download_update(update_url, update_destination, progress_callback=None, chunk_size=io.DEFAULT_BUFFER_SIZE):
+def download_update(update_url, update_destination, requests_session, progress_callback=None, chunk_size=io.DEFAULT_BUFFER_SIZE):
  total_downloaded = total_size = 0
  with io.open(update_destination, 'w+b') as outfile:
-  download = requests.get(update_url, stream=True)
+  download = requests_session.get(update_url, stream=True)
   total_size = int(download.headers.get('content-length', 0))
   logger.debug("Total update size: %d" % total_size)
   download.raise_for_status()
