@@ -36,7 +36,7 @@ def perform_update(endpoint, current_version, app_name='', password=None, update
 def create_requests_session(app_name=None, version=None):
  user_agent = requests.session().headers['User-Agent']
  if app_name:
-  user_agent = '%s + %s / %d' % (user_agent, app_name, version)
+  user_agent = '%s + %s / %r' % (user_agent, app_name, version)
  session = requests.session()
  session.headers = {'User-Agent': user_agent}
  return session
