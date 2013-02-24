@@ -34,11 +34,11 @@ def perform_update(endpoint, current_version, app_name='', password=None, update
   update_complete_callback()
 
 def create_requests_session(app_name=None, version=None):
- user_agent = requests.session().headers['User-Agent']
- if app_name:
-  user_agent = '%s + %s/%r' % (user_agent, app_name, version)
+ user_agent = ''
  session = requests.session()
- session.headers = {'User-Agent': user_agent}
+ if app_name:
+  user_agent = ' %s/%r' % (app_name, version)
+ session.headers['User-Agent'] = session.headers['User-Agent'] + user_agent
  return session
 
 def find_update(endpoint, version, requests_session):
