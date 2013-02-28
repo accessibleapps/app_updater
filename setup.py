@@ -12,6 +12,7 @@ setup(
   'bootstrappers/*',
  ]},
  install_requires = [
+  'requests',
   'platform_utils',
  ],
  classifiers = [
