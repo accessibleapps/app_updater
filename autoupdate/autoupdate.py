@@ -16,16 +16,22 @@ from platform_utils import paths
 
 def perform_update(endpoint, current_version, app_name='', password=None, update_available_callback=None, progress_callback=None, update_complete_callback=None):
  requests_session = create_requests_session(app_name=app_name, version=current_version)
- available_update = find_update(endpoint, current_version, requests_session=requests_session)
+ available_update = find_update(endpoint, requests_session=requests_session)
  if not available_update:
   return
- if callable(update_available_callback) and not update_available_callback(): #update_available_callback should return a falsy value to stop the process
+ available_version = available_update['current_version']
+ if not str(available_version) > str(current_version) or platform.system() not in available_update['downloads']:
+  return
+ available_description = available_update.get('description', None)
+ update_url = available_update ['downloads'][platform.system()]
+ logger.info("A new update is available. Version %s" % available_version)
+ if callable(update_available_callback) and not update_available_callback(version=available_version, description=available_description): #update_available_callback should return a falsy value to stop the process
   logger.info("User canceled update.")
   return
  base_path = tempfile.mkdtemp()
  download_path = os.path.join(base_path, 'update.zip')
  update_path = os.path.join(base_path, 'update')
- downloaded = download_update(available_update, download_path, requests_session=requests_session, progress_callback=progress_callback)
+ downloaded = download_update(update_url, download_path, requests_session=requests_session, progress_callback=progress_callback)
  extracted = extract_update(downloaded, update_path, password=password)
  bootstrap_path = move_bootstrap(extracted)
  execute_bootstrap(bootstrap_path, extracted)
@@ -41,13 +47,11 @@ def create_requests_session(app_name=None, version=None):
  session.headers['User-Agent'] = session.headers['User-Agent'] + user_agent
  return session
 
-def find_update(endpoint, version, requests_session):
+def find_update(endpoint, requests_session):
  response = requests_session.get(endpoint)
  response.raise_for_status()
  content = response.json()
- if str(content['current_version']) > str(version) and platform.system() in content['downloads']:
-  logger.info("A new update is available. Version %s" % content['current_version'])
-  return content['downloads'].get(platform.system())
+ return content
 
 def download_update(update_url, update_destination, requests_session, progress_callback=None, chunk_size=io.DEFAULT_BUFFER_SIZE):
  total_downloaded = total_size = 0
