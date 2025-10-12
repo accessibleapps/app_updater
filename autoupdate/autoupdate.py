@@ -1,12 +1,9 @@
-from logging import getLogger
-
-logger = getLogger("autoupdate")
-
 import contextlib
 import io
 import os
 import platform
 import tempfile
+from logging import getLogger
 
 import requests
 
@@ -16,6 +13,8 @@ except ImportError:
     import zipfile
 
 from platform_utils import paths
+
+logger = getLogger("autoupdate")
 
 
 def perform_update(
@@ -36,7 +35,7 @@ def perform_update(
         return
     available_description = available_update.get("description", None)
     update_url = available_update["downloads"][platform.system()]
-    logger.info("A new update is available. Version %s" % available_version)
+    logger.info(f"A new update is available. Version {available_version}")
     if callable(update_available_callback) and not update_available_callback(
         version=available_version, description=available_description
     ):  # update_available_callback should return a falsy value to stop the process
@@ -60,7 +59,7 @@ def create_requests_session(app_name=None, version=None):
     user_agent = ""
     session = requests.session()
     if app_name:
-        user_agent = " %s/%r" % (app_name, version)
+        user_agent = f" {app_name}/{version!r}"
     session.headers["User-Agent"] = session.headers["User-Agent"] + user_agent
     return session
 
@@ -79,7 +78,7 @@ def download_update(
     with open(update_destination, "w+b") as outfile:
         download = requests_session.get(update_url, stream=True)
         total_size = int(download.headers.get("content-length", 0))
-        logger.debug("Total update size: %d" % total_size)
+        logger.debug(f"Total update size: {total_size}")
         download.raise_for_status()
         for chunk in download.iter_content(chunk_size):
             outfile.write(chunk)
@@ -111,7 +110,7 @@ def move_bootstrap(extracted_path):
 
 
 def execute_bootstrap(bootstrap_path, source_path):
-    arguments = r'"%s" "%s" "%s" "%s"' % (os.getpid(), source_path, paths.app_path(), paths.get_executable())
+    arguments = rf'"{os.getpid()}" "{source_path}" "{paths.app_path()}" "{paths.get_executable()}"'
     if platform.system() == "Windows":
         import win32api
 
@@ -120,7 +119,7 @@ def execute_bootstrap(bootstrap_path, source_path):
         import subprocess
 
         make_executable(bootstrap_path)
-        subprocess.Popen(["%s %s" % (bootstrap_path, arguments)], shell=True)
+        subprocess.Popen([f"{bootstrap_path} {arguments}"], shell=True)
     logger.info("Bootstrap executed")
 
 
@@ -142,5 +141,5 @@ def make_executable(path):
 def call_callback(callback, *args, **kwargs):
     try:
         callback(*args, **kwargs)
-    except:
-        logger.exception("Failed calling callback %r with args %r and kwargs %r" % (callback, args, kwargs))
+    except Exception:
+        logger.exception(f"Failed calling callback {callback!r} with args {args!r} and kwargs {kwargs!r}")
