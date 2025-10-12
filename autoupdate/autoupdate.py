@@ -3,15 +3,10 @@ import io
 import os
 import platform
 import tempfile
+import zipfile
 from logging import getLogger
 
 import requests
-
-try:
-    import czipfile as zipfile
-except ImportError:
-    import zipfile
-
 from platform_utils import paths
 
 logger = getLogger("autoupdate")
@@ -60,7 +55,7 @@ def create_requests_session(app_name=None, version=None):
     session = requests.session()
     if app_name:
         user_agent = f" {app_name}/{version!r}"
-    session.headers["User-Agent"] = session.headers["User-Agent"] + user_agent
+    session.headers["User-Agent"] = str(session.headers["User-Agent"]) + user_agent
     return session
 
 
