@@ -7,6 +7,7 @@ import zipfile
 from logging import getLogger
 
 import requests
+from packaging.version import Version
 from platform_utils import paths
 
 logger = getLogger("autoupdate")
@@ -26,7 +27,10 @@ def perform_update(
     if not available_update:
         return
     available_version = available_update["current_version"]
-    if not str(available_version) > str(current_version) or platform.system() not in available_update["downloads"]:
+    if (
+        Version(str(available_version)) <= Version(str(current_version))
+        or platform.system() not in available_update["downloads"]
+    ):
         return
     available_description = available_update.get("description", None)
     update_url = available_update["downloads"][platform.system()]

@@ -266,14 +266,18 @@ class TestPerformUpdate:
         update_available_callback.assert_called_once()
 
     @responses.activate
-    def test_version_comparison_string_based(self):
-        """Test that version comparison is string-based (as per code)."""
+    @pytest.mark.parametrize(
+        "current_version,available_version,expected_callback_count",
+        [
+            ("9.10", "10.0", 1),
+            ("10.0", "9.10", 0),
+        ],
+    )
+    def test_version_comparison_uses_release_order(self, current_version, available_version, expected_callback_count):
+        """Compare release versions by their components rather than lexically."""
         endpoint = "https://api.example.com/check-update"
-
-        # String comparison: "2.0.0" > "1.0.0" is True
-        current_version = "1.0.0"
         update_response = {
-            "current_version": "2.0.0",
+            "current_version": available_version,
             "downloads": {"Windows": "https://example.com/update.zip"},
         }
 
@@ -284,8 +288,7 @@ class TestPerformUpdate:
         with patch("platform.system", return_value="Windows"):
             perform_update(endpoint, current_version, update_available_callback=update_available_callback)
 
-        # Should trigger update check
-        update_available_callback.assert_called_once()
+        assert update_available_callback.call_count == expected_callback_count
 
     # Helper methods
     def _create_zip_with_bootstrap(self, bootstrap_name):

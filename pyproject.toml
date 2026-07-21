@@ -18,6 +18,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
+    "packaging",
     "requests",
     "platform_utils",
 ]
