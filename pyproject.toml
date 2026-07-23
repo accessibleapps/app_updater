@@ -38,9 +38,6 @@ test = [
 [tool.hatch.build.targets.wheel]
 packages = ["autoupdate"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"autoupdate/bootstrappers" = "autoupdate/bootstrappers"
-
 [tool.ruff]
 line-length = 120
 target-version = "py38"

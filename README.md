@@ -87,6 +87,9 @@ uv run ruff format
 
 # Type checking
 uv run pyright
+
+# Build wheel and source distribution
+uv build
 ```
 
 ## License
