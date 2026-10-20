@@ -8,10 +8,12 @@ Keep the existing updater API and behavior while releasing a streamed download r
 
 - Worker thread: 01a15b4c-c035-7355-a97b-abcada04c033.
 - Exact origin: git@github.com:accessibleapps/app_updater.git; authenticated GitHub account ctoth has push permission.
-- Fresh default master fetched 2026-10-20 at 646aac1c5e582afe98ac9a64a49eade2606e5d1b.
-- Canonical checkout C:/Users/Q/code/app_updater was clean, including untracked paths; master tracked origin/master at +0/-0. Its existing ignored artifacts are untouched.
+- Initial default was 646aac1c5e582afe98ac9a64a49eade2606e5d1b. Current rebased base is master bf238c8125914d35eca3d01c7da8b7f56c930ef6, which merged prerequisite #8; its postmerge CI 39515528038 passed.
+- Canonical checkout C:/Users/Q/code/app_updater remains clean at initial 646aac1; origin/master is now bf238c8. Its existing ignored artifacts are untouched.
 - Isolated worktree created directly at C:/Users/Q/Documents/Codex/2026-10-20/task-6/worktrees/app_updater after verifying absence; branch modernize/task6-app_updater. Only canonical worktree existed before creation. No repository-targeting Codex/Claude process command line was found; other user sessions exist and remain untouched.
 - Existing PRs #2 (97efc43c19ab8aa01a7361eaa0afaa51e891debb) and #5 (30cd49b6b3e847c7384b27192dc3f018ad26ea97) are unrelated and preserved. No applicable repository AGENTS.md, CLAUDE.md, agent-notes, .agents/skills or active Git hooks were found.
+- Published draft PR #6: https://github.com/accessibleapps/app_updater/pull/6, feature head 9520d445a02c1f309b22a04969e9dbd7b9dff70b. Rebase preserved the original feature diff and note; local/remote original 051d545 tips remain in distinct archive/task6-updater-6-local-before-baseline and archive/task6-updater-6-remote-before-baseline refs.
+- Actual Claude review found production/regression correct and requested only this stale-note correction. This note-only follow-up awaits coordinator publication review, then actual Claude review and hosted checks of its final head before any merge.
 
 ## Decisions and why
 
@@ -21,12 +23,17 @@ Keep the existing updater API and behavior while releasing a streamed download r
 - Topology node app-updater owns autoupdate and pyproject.toml. app_framework/pyproject.toml declares this owner and app_framework/updates.py imports/delegates to perform_update. No consumer source/ref or authoritative lock changes are part of this slice.
 - pyproject.toml and uv.lock are tracked/clean; both retain Python >=3.8.6. README test authority is uv run pytest; focused invocation adds this actively edited file only and --locked --group test to provision its declared tests without lock changes.
 
-## Surprises
+## Historical initial implementation surprises
 
 - Sandboxed Git reads hit dubious-ownership protection. Normal approved execution as the owner succeeded; no safe.directory or security settings changed.
 - No tracked .github workflow exists. GitHub actions/workflows lists only dynamic/dependabot/update-graph. Full README checks (pytest, ruff check, pyright, uv build) therefore lack an existing hosted authority; parent notified to settle an alternative under the global local-CI restriction. Do not invent CI.
 
 ## Verification
+
+- Current published feature head 9520d445: hosted pull_request CI 39516217700 SUCCESS (https://github.com/accessibleapps/app_updater/actions/runs/39516217700), Windows Python 3.13.16; 69 passed/1 existing skip, Ruff passes, Pyright 0 diagnostics, wheel/sdist built. The base now tracks .github/workflows/ci.yml and #8 removed the ten old lint findings. No Linux/macOS runtime claim.
+- This follow-up changes only this note; production, regression, manifest, lock and workflow remain unchanged. No local full checks rerun now that hosted CI is available.
+
+### Historical initial red/green evidence (before prerequisite #8 and rebase)
 
 - Before fix: `uv run --locked --group test pytest tests/test_download.py` on Windows / CPython 3.13.15 / pytest 8.4.2: **1 failed, 7 passed**. The existing HTTP-error test fails at `assert error.value.response.raw.closed` with False on a real `<Response [404]>`. Existing content, progress, custom chunk size, absent Content-Length, empty and binary download cases pass. Seven pre-existing responses stream-argument deprecation warnings.
 - The first sandbox invocation could not access the existing uv cache and ran no tests. Normal approved execution succeeded; no cache/security configuration changed.
@@ -42,4 +49,4 @@ Keep the existing updater API and behavior while releasing a streamed download r
 
 ## Next step
 
-Local implementation is complete: production diff is 3 added/2 removed lines and regression diff is 3 added/1 removed lines, plus this living note. Final tracked diff is limited to those files; no secrets, signing keys, private data or unrelated samples are present. Canonical checkout remains clean at the captured base. Commit the named files with subject `Close streamed update responses after download`, then report exact commit to the coordinator for required publication review. No push or PR until authorized. No release, deployment, merge, ready transition, external comment or existing PR edit occurred.
+Commit this note-only correction and return its exact head/diff to the coordinator before publication. After authorized publication, obtain actual Claude approval and hosted green checks on that final head before merge. PR #6 remains draft and unmerged; #7 remains untouched pending serialized #6 completion. Preserve all archives/worktrees. No release, deployment or default-branch direct push is authorized.
