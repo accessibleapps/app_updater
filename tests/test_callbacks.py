@@ -2,8 +2,6 @@
 
 from unittest.mock import Mock
 
-import pytest
-
 from autoupdate.autoupdate import call_callback
 
 

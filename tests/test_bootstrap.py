@@ -3,7 +3,7 @@
 import os
 import platform
 import stat
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -104,10 +104,6 @@ class TestMakeExecutable:
         test_file = os.path.join(temp_dir, "test_script.sh")
         with open(test_file, "w") as f:
             f.write("#!/bin/bash\necho test")
-
-        # Get initial permissions
-        initial_stat = os.stat(test_file)
-        initial_mode = initial_stat.st_mode
 
         # Make executable
         make_executable(test_file)

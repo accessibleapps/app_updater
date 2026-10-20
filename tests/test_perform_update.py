@@ -1,7 +1,5 @@
 """Integration tests for the complete update flow."""
 
-import os
-import platform
 import zipfile
 from unittest.mock import Mock, patch
 

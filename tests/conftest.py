@@ -1,6 +1,5 @@
 """Shared pytest fixtures for autoupdate tests."""
 
-import io
 import os
 import tempfile
 import zipfile
