@@ -116,7 +116,7 @@ class TestExtractUpdate:
         zip_path = os.path.join(temp_dir, "empty.zip")
 
         # Create empty zip
-        with zipfile.ZipFile(zip_path, "w") as zf:
+        with zipfile.ZipFile(zip_path, "w"):
             pass  # Empty zip
 
         extract_dir = os.path.join(temp_dir, "extracted")

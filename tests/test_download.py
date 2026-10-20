@@ -1,6 +1,5 @@
 """Tests for download functionality."""
 
-import io
 import os
 from unittest.mock import Mock
 

@@ -1,6 +1,5 @@
 """Tests for session creation and user agent handling."""
 
-import pytest
 import requests
 
 from autoupdate.autoupdate import create_requests_session
