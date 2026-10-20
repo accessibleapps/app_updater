@@ -74,8 +74,9 @@ def download_update(
     update_url, update_destination, requests_session, progress_callback=None, chunk_size=io.DEFAULT_BUFFER_SIZE
 ):
     total_downloaded = total_size = 0
-    with open(update_destination, "w+b") as outfile:
-        download = requests_session.get(update_url, stream=True)
+    with open(update_destination, "w+b") as outfile, contextlib.closing(
+        requests_session.get(update_url, stream=True)
+    ) as download:
         total_size = int(download.headers.get("content-length", 0))
         logger.debug(f"Total update size: {total_size}")
         download.raise_for_status()
