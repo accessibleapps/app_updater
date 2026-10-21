@@ -146,8 +146,10 @@ class TestDownloadUpdate:
 
         session = create_requests_session()
 
-        with pytest.raises(HTTPError):
+        with pytest.raises(HTTPError) as error:
             download_update(url, destination, session)
+
+        assert error.value.response.raw.closed
 
         # File IS created when opened, even though download fails
         # (Opened with 'w+b' before raise_for_status is called)
