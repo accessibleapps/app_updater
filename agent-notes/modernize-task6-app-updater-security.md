@@ -6,11 +6,12 @@ Update the locked runtime HTTP dependencies to supported security patches, prese
 
 - Worker identity supplied by host: /root/modernize_audio_urls.
 - Exact owner accessibleapps/app_updater, origin git@github.com:accessibleapps/app_updater.git, authenticated ctoth with admin/push access, public non-fork/non-archived, default master.
-- Fresh ls-remote and fetch base: 646aac1c5e582afe98ac9a64a49eade2606e5d1b. Canonical master matches origin/master (0/0), clean including staged/unstaged/untracked files at inspection; ignored files remain untouched.
-- Existing worktree worktrees/app_updater and draft PR #6/head 051d54598678d3cdc7120b6e3cc2ec85fa8b4c36 are separate and preserved. Open PRs #2 and #5 are unrelated and untouched. New branch modernize/task6-app-updater-security created directly in worktrees/app-updater-security after checking absence.
+- Initial base was 646aac1c5e582afe98ac9a64a49eade2606e5d1b. Current fresh master/base is a0cce9c386bbf4ae19008e55c8ffbdb8ad1c2220, which merged #6 after prerequisite #8; postmerge push CI 39519210719 passed. Canonical master remains clean at initial 646aac1 and was not moved; ignored files remain untouched.
+- Published draft PR #7: https://github.com/accessibleapps/app_updater/pull/7, remote head a65b75dffae9640094e1b4d58f1b871b7df3942d. This isolated modernize/task6-app-updater-security worktree rebased locally with --no-update-refs; original local and remote tips remain in distinct archive/task6-updater-7-local-before-baseline and archive/task6-updater-7-remote-before-baseline refs. No push yet.
+- #6 merged at a0cce9c after actual Claude approval and green CI, preserving its separate branch/worktree. Open PRs #2 and #5 remain untouched. This local follow-up refreshes only this existing note; the original security lock is unchanged.
 - Global AGENTS.md, repository inventory, README, pyproject.toml, uv.lock, updater session/download source and tests, existing branch note and relevant ownership/shared-dependency skills were read. No repository/nested AGENTS.md, CLAUDE.md, .agents/skills or active Git hooks/core.hooksPath were found.
 
-# Decisions and why
+# Initial decisions and why (historical dependency scope retained)
 
 - Smallest coherent slice: approximately 50-100 changed lock lines plus this required note. Final lock diff is +43/-12: idna 3.10 -> 3.15 on every target, Requests 2.32.5 -> 2.33.0 and urllib3 2.5.0 -> 2.8.0 only on Python >=3.10. Original Python 3.8 and 3.9 Requests/urllib3 versions and artifact metadata are retained. No runtime code/test/manifest/consumer edit or unrelated package upgrade. No custom vulnerability payload or new test is needed for a lock-only update; existing real Requests/session/download compatibility tests supply application verification.
 - Official PyPI metadata declares Requests 2.33.0 and urllib3 2.8.0 require Python >=3.10, idna 3.15 requires >=3.8. Official changelogs were read at https://requests.readthedocs.io/en/latest/community/updates/ and https://urllib3.readthedocs.io/en/stable/changelog.html . These support limits determine the forks; the project support floor remains unchanged.
@@ -21,11 +22,17 @@ Update the locked runtime HTTP dependencies to supported security patches, prese
 - README and topology authority: uv sync --all-groups; uv run pytest; uv run ruff check; uv run pyright; uv build. uv run ruff format is a mutating formatter and is excluded from this security slice. Parent authorized those full nonpublishing checks locally once because only dynamic/dependabot/update-graph exists, no hosted test CI. Known baseline Ruff findings will be reported without changing unrelated source.
 - The tracked lock has requires-python >=3.8.6 and three resolution markers (<3.9, 3.9.*, >=3.10); every unrelated package/version/artifact and these markers must remain unchanged. Only references needed to select the three HTTP dependencies may change. Command invocations must retain lock freshness and preserve the exact scoped diff.
 
-# Surprises
+# Historical initial implementation surprises
 
 - Canonical checkout is currently clean despite the earlier task snapshot mentioning dirty locks; current clean state is the captured ledger and no files were discarded.
 
 # Verification
+
+- Current local rebase was conflict-free; range-diff reports the original security commit unchanged. Lock SHA256 remains A47E8E75246FE12BC6268092232C768CF33023391C8B6934FCEFF33C6701EB1B. Production, tests, manifest and inherited workflow match current master; baseline lint cleanup and streamed-response fix are retained.
+- Current master tracks .github/workflows/ci.yml and has green full Windows Python 3.13 CI. No local full checks rerun. Proposed hosted coverage is Python 3.8, 3.9, 3.10 and 3.13 for the actual differing HTTP/test dependency branches; workflow changes await coordinator scope review before authorship/publication. This head has no new hosted result or actual Claude review yet.
+- Current residual limit: Python 3.8/3.9 retain known Requests/urllib3 advisories because the selected fully patched upstream versions require >=3.10. No all-advisories-clean claim, invented backport or support-policy change. The lock governs owner development/tests; consumers do not consume it automatically.
+
+## Historical initial implementation checks (before #8/#6 baseline merges and rebase)
 
 - Narrow resolver operations: uv lock --upgrade-package idna==3.15; scoped Requests/urllib3 upgrades; final older-target record retention via apply_patch using original artifact metadata. Complete final diff inspected. All unrelated lock records are identical to base except autoupdate/responses references to the selected HTTP forks; their other fields are identical. Global requires-python and resolution-markers are identical.
 - Final uv lock --check: exit 0, 38 resolved package records. Target-marker evaluation yields Python 3.8.6: Requests 2.32.4 / urllib3 2.2.3; 3.9.0: Requests 2.32.5 / urllib3 2.5.0; 3.10.0 and 3.13.15: Requests 2.33.0 / urllib3 2.8.0; idna 3.15 throughout. This proves graph selection, not execution on all interpreters.
@@ -37,4 +44,4 @@ Update the locked runtime HTTP dependencies to supported security patches, prese
 
 # Next step
 
-The completed local slice consists only of uv.lock plus this note. Return concrete commit/base/head and concise PR text for required coordinator review before any push or draft PR. Preserve existing PR #6 and every branch/worktree. No merge, ready transition, release, deployment, default push, closure, external comment/review or other PR edit is authorized.
+Return the complete rebased lock/note diff, exact local head and proposed minimal hosted Python 3.8/3.9/3.10/3.13 matrix with dependency/runtime authorities to the coordinator before any push. Matrix authoring, publication and final-head actual Claude/hosted gates remain pending coordinator action. PR #7 stays draft and unmerged; preserve all branches/worktrees and archive refs. No local full CI rerun, support-policy change, old PR-description edit, release, deployment, default push or closure.
