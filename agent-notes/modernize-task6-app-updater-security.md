@@ -7,8 +7,8 @@ Update the locked runtime HTTP dependencies to supported security patches, prese
 - Worker identity supplied by host: /root/modernize_audio_urls.
 - Exact owner accessibleapps/app_updater, origin git@github.com:accessibleapps/app_updater.git, authenticated ctoth with admin/push access, public non-fork/non-archived, default master.
 - Initial base was 646aac1c5e582afe98ac9a64a49eade2606e5d1b. Current fresh master/base is a0cce9c386bbf4ae19008e55c8ffbdb8ad1c2220, which merged #6 after prerequisite #8; postmerge push CI 39519210719 passed. Canonical master remains clean at initial 646aac1 and was not moved; ignored files remain untouched.
-- Published draft PR #7: https://github.com/accessibleapps/app_updater/pull/7, remote head a65b75dffae9640094e1b4d58f1b871b7df3942d. This isolated modernize/task6-app-updater-security worktree rebased locally with --no-update-refs; original local and remote tips remain in distinct archive/task6-updater-7-local-before-baseline and archive/task6-updater-7-remote-before-baseline refs. No push yet.
-- #6 merged at a0cce9c after actual Claude approval and green CI, preserving its separate branch/worktree. Open PRs #2 and #5 remain untouched. This local follow-up refreshes only this existing note; the original security lock is unchanged.
+- Draft PR #7: https://github.com/accessibleapps/app_updater/pull/7, originally published at a65b75dffae9640094e1b4d58f1b871b7df3942d. This isolated modernize/task6-app-updater-security worktree rebased locally with --no-update-refs; original local and remote tips remain in distinct archive/task6-updater-7-local-before-baseline and archive/task6-updater-7-remote-before-baseline refs. Publication requires coordinator review of the complete final range.
+- #6 merged at a0cce9c after actual Claude approval and green CI, preserving its separate branch/worktree. Open PRs #2 and #5 remain untouched. Coordinator approved this existing-note refresh and the smallest hosted matrix amendment; the original security lock is unchanged.
 - Global AGENTS.md, repository inventory, README, pyproject.toml, uv.lock, updater session/download source and tests, existing branch note and relevant ownership/shared-dependency skills were read. No repository/nested AGENTS.md, CLAUDE.md, .agents/skills or active Git hooks/core.hooksPath were found.
 
 # Initial decisions and why (historical dependency scope retained)
@@ -28,8 +28,9 @@ Update the locked runtime HTTP dependencies to supported security patches, prese
 
 # Verification
 
-- Current local rebase was conflict-free; range-diff reports the original security commit unchanged. Lock SHA256 remains A47E8E75246FE12BC6268092232C768CF33023391C8B6934FCEFF33C6701EB1B. Production, tests, manifest and inherited workflow match current master; baseline lint cleanup and streamed-response fix are retained.
-- Current master tracks .github/workflows/ci.yml and has green full Windows Python 3.13 CI. No local full checks rerun. Proposed hosted coverage is Python 3.8, 3.9, 3.10 and 3.13 for the actual differing HTTP/test dependency branches; workflow changes await coordinator scope review before authorship/publication. This head has no new hosted result or actual Claude review yet.
+- Current local rebase was conflict-free; range-diff reports the original security commit unchanged. Lock SHA256 remains A47E8E75246FE12BC6268092232C768CF33023391C8B6934FCEFF33C6701EB1B. Production, tests and manifest match current master; baseline lint cleanup and streamed-response fix are retained.
+- Authored hosted matrix now selects Windows Python 3.8, 3.9, 3.10 and 3.13 in the existing checks job, with fail-fast false and interpreter-specific names. Exact existing actions, full locked commands, timeout, permissions and support floor retained. This covers the concrete differing HTTP/test dependency branches. No local full checks rerun; the final published head requires actual Claude review and all four hosted legs green before merge.
+- Authored YAML audited once: actionlint v1.7.12 exit 0; zizmor v1.31.1 --offline exit 0, no findings. Offline scope only; lock hash unchanged and diff whitespace check passes.
 - Current residual limit: Python 3.8/3.9 retain known Requests/urllib3 advisories because the selected fully patched upstream versions require >=3.10. No all-advisories-clean claim, invented backport or support-policy change. The lock governs owner development/tests; consumers do not consume it automatically.
 
 ## Historical initial implementation checks (before #8/#6 baseline merges and rebase)
@@ -44,4 +45,4 @@ Update the locked runtime HTTP dependencies to supported security patches, prese
 
 # Next step
 
-Return the complete rebased lock/note diff, exact local head and proposed minimal hosted Python 3.8/3.9/3.10/3.13 matrix with dependency/runtime authorities to the coordinator before any push. Matrix authoring, publication and final-head actual Claude/hosted gates remain pending coordinator action. PR #7 stays draft and unmerged; preserve all branches/worktrees and archive refs. No local full CI rerun, support-policy change, old PR-description edit, release, deployment, default push or closure.
+Return the complete rebased lock/note/workflow diff and exact local head to the coordinator before any push. Publication and final-head actual Claude review plus all four hosted legs remain required before merge. PR #7 stays draft and unmerged; preserve all branches/worktrees and archive refs. No local full CI rerun, support-policy change, old PR-description edit, release, deployment, default push, closure or Actions setting change.
