@@ -2,6 +2,8 @@ import contextlib
 import io
 import os
 import platform
+import shutil
+import subprocess
 import tempfile
 import zipfile
 from logging import getLogger
@@ -91,6 +93,9 @@ def download_update(
 
 def extract_update(update_archive, destination, password=None):
     """Given an update archive, extracts it. Returns the directory to which it has been extracted"""
+    if platform.system() == "Darwin" and not password:
+        subprocess.check_call(["/usr/bin/ditto", "-x", "-k", update_archive, destination])
+        return destination
     with contextlib.closing(zipfile.ZipFile(update_archive)) as archive:
         if password:
             archive.setpassword(password)
@@ -105,7 +110,11 @@ def move_bootstrap(extracted_path):
         extracted_path = os.path.join(extracted_path, "Contents", "Resources")
     downloaded_bootstrap = os.path.join(extracted_path, bootstrap_name())
     new_bootstrap_path = os.path.join(working_path, bootstrap_name())
-    os.rename(downloaded_bootstrap, new_bootstrap_path)
+    if platform.system() == "Darwin":
+        # Removing this file would invalidate the incoming bundle's signature.
+        shutil.copy2(downloaded_bootstrap, new_bootstrap_path)
+    else:
+        os.rename(downloaded_bootstrap, new_bootstrap_path)
     return new_bootstrap_path
 
 
@@ -115,9 +124,12 @@ def execute_bootstrap(bootstrap_path, source_path):
         import win32api
 
         win32api.ShellExecute(0, "open", bootstrap_path, arguments, "", 5)
+    elif platform.system() == "Darwin":
+        executable = paths.get_executable()
+        bundle = os.path.dirname(os.path.dirname(os.path.dirname(executable)))
+        make_executable(bootstrap_path)
+        subprocess.Popen([bootstrap_path, str(os.getpid()), source_path, bundle, executable])
     else:
-        import subprocess
-
         make_executable(bootstrap_path)
         subprocess.Popen([f"{bootstrap_path} {arguments}"], shell=True)
     logger.info("Bootstrap executed")

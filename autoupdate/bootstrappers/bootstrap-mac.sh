@@ -1,36 +1,24 @@
-#!/bin/bash  -x
-MoveToTarget() {
-	#This takes to 2 arguments: source and target
-        echo ""$1"  "$2""
-	cp -rf "$1"/* "$2"
-	rm -r "$1"
-}
+#!/bin/bash
+set -e
 
-WaitForProcessToEnd() {
-	#This takes 1 argument. The PID to wait for
-	#Unlike the AutoIt version, this sleeps 1 second
-	while [ $(kill -0 "$1") ]; do
-    		sleep 1
-  	done
-}
-
-RunApplication() {
-	#This takes 1 application, the path to the thing to execute
-	echo "toExec: "$1""
-	exec "$1"
-}
-
-#our main code block
 pid="$1"
 SourcePath="$2"
 DestPath="$3"
 ToExecute="$4"
-WaitForProcessToEnd $pid
-MoveToTarget "$SourcePath" "$DestPath"
-RunApplication "$ToExecute"
 
-osascript<<END
-tell application "Terminal"
-quit
-end tell
-END
+while kill -0 "$pid" 2>/dev/null; do
+    sleep 1
+done
+
+# Stage on the destination volume, preserving framework links and permissions.
+test -d "$SourcePath/Contents"
+test -d "$DestPath/Contents"
+stage=$(mktemp -d "${DestPath%/*}/.app-update.XXXXXX")
+/usr/bin/ditto "$SourcePath/Contents" "$stage/Contents"
+mv "$DestPath/Contents" "$stage/previous"
+if ! mv "$stage/Contents" "$DestPath/Contents"; then
+    mv "$stage/previous" "$DestPath/Contents"
+    exit 1
+fi
+rm -rf "$stage"
+exec "$ToExecute"

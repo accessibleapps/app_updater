@@ -71,7 +71,7 @@ class TestMoveBootstrap:
         expected_path = os.path.join(temp_dir, "bootstrap-mac.sh")
         assert result == expected_path
         assert os.path.exists(expected_path)
-        assert not os.path.exists(bootstrap_src)
+        assert os.path.exists(bootstrap_src)  # Keep signed bundle contents intact.
 
     @patch("platform.system", return_value="Linux")
     def test_move_bootstrap_linux(self, mock_system, temp_dir):
@@ -211,4 +211,7 @@ class TestExecuteBootstrap:
         # Verify subprocess.Popen was called
         mock_popen.assert_called_once()
         call_args = mock_popen.call_args
-        assert call_args[1]["shell"] is True
+        assert call_args[0][0] == [
+            bootstrap_path, "12345", source_path, "/Applications/MyApp.app",
+            "/Applications/MyApp.app/Contents/MacOS/MyApp",
+        ]
