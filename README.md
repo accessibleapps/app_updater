@@ -5,8 +5,10 @@ Cross-platform application auto-updater for Python applications on Windows, macO
 ## Installation
 
 ```bash
-pip install autoupdate
+pip install git+https://github.com/accessibleapps/app_updater.git
 ```
+
+It isn't on PyPI, so install it from GitHub. The package installs as `autoupdate`.
 
 ## Usage
 
